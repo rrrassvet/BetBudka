@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Братский Проект</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #0d1117;
+            color: #c9d1d9;
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: #161b22;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid #21262d;
+        }
+
+        header h1 {
+            color: #58a6ff;
+            font-size: 2.5rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #161b22;
+            border-radius: 8px;
+            border: 1px solid #21262d;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        h2 {
+            color: #f0f6fc;
+            margin-bottom: 15px;
+        }
+
+        p {
+            margin-bottom: 20px;
+            color: #8b949e;
+        }
+
+        .btn-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: #238636;
+            color: #ffffff;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: bold;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background-color: #2ea043;
+            cursor: pointer;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            font-size: 0.9rem;
+            color: #8b949e;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Добро пожаловать на наш сайт!</h1>
+    </header>
+
+    <div class="container">
+        <h2>О проекте</h2>
+        <p>Здесь будет твой топовый контент. Этот шаблон полностью готов к работе: он легкий, быстрый и отлично открывается с любого телефона.</p>
+        
+        <h2>Что делаем дальше?</h2>
+        <p>Ты можешь легко изменить любой текст в этом файле через обычный Блокнот. Поменяй заголовки, добавь свои контакты или описание услуг.</p>
+
+        <div class="btn-container">
+            <a href="https://t.me" target="_blank" class="btn">Связаться со мной</a>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2026 Сделано по-братски для лучшего человека.</p>
+    </footer>
+
+</body>
+</html>
