@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Братская Система v2.5</title>
+    <title>Fantasy League BB</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
         }
 
         body {
-            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            background: linear-gradient(135deg, #0f111a 0%, #1a0f11 100%);
             color: #f8fafc;
             min-height: 100vh;
             display: flex;
@@ -24,16 +24,15 @@
 
         /* Общие карточки окон */
         .window-card {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(20, 24, 38, 0.85);
+            border: 2px solid #3b82f6; /* Синий акцент */
             padding: 40px 30px;
-            border-radius: 16px;
+            border-radius: 12px;
             width: 100%;
-            max-width: 450px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
             text-align: center;
-            display: none; /* Переключается через JS */
+            display: none;
         }
 
         .window-card.active {
@@ -43,7 +42,9 @@
         h1 {
             font-size: 1.8rem;
             margin-bottom: 8px;
-            color: #fff;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .subtitle {
@@ -68,9 +69,9 @@
         input {
             width: 100%;
             padding: 12px 16px;
-            background: #0f172a;
-            border: 2px solid #334155;
-            border-radius: 8px;
+            background: #0b0d14;
+            border: 1px solid #475569;
+            border-radius: 6px;
             color: #fff;
             font-size: 1rem;
             outline: none;
@@ -78,8 +79,8 @@
         }
 
         input:focus {
-            border-color: #6366f1;
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+            border-color: #ef4444; /* Красный акцент при фокусе */
+            box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
         }
 
         .profile-selection {
@@ -90,54 +91,46 @@
         }
 
         .profile-option {
-            background: #1e293b;
-            border: 2px solid #334155;
+            background: #161b26;
+            border: 2px solid #475569;
             padding: 15px;
-            border-radius: 10px;
+            border-radius: 8px;
             cursor: pointer;
             transition: all 0.2s ease;
+            font-weight: 600;
         }
 
         .profile-option:hover {
-            border-color: #475569;
-            background: #24344d;
+            border-color: #3b82f6;
         }
 
         .profile-option.active {
-            border-color: #6366f1;
-            background: rgba(99, 102, 241, 0.15);
-        }
-
-        .profile-icon {
-            font-size: 1.8rem;
-            margin-bottom: 8px;
-        }
-
-        .profile-title {
-            font-weight: 600;
-            font-size: 0.95rem;
+            border-color: #ef4444; /* Красный цвет для активного профиля */
+            background: rgba(239, 68, 68, 0.1);
         }
 
         .btn-submit {
             width: 100%;
-            background: #6366f1;
+            background: #ef4444; /* Основная кнопка — красная */
             color: white;
             border: none;
             padding: 14px;
-            border-radius: 8px;
+            border-radius: 6px;
             font-size: 1rem;
-            font-weight: 600;
+            font-weight: bold;
             cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
             transition: background 0.2s;
             margin-bottom: 15px;
         }
 
         .btn-submit:hover {
-            background: #4f46e5;
+            background: #dc2626;
         }
 
         .switch-link {
-            color: #818cf8;
+            color: #3b82f6;
             cursor: pointer;
             font-size: 0.9rem;
             text-decoration: underline;
@@ -155,9 +148,9 @@
             border-radius: 6px;
         }
 
-        /* Стили Личного Кабинета */
+        /* Личный кабинет */
         .cabinet-card {
-            max-width: 700px;
+            max-width: 800px;
             text-align: left;
         }
 
@@ -165,37 +158,63 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            border-bottom: 2px solid #3b82f6;
             padding-bottom: 15px;
             margin-bottom: 20px;
         }
 
         .badge {
             padding: 4px 10px;
-            border-radius: 20px;
+            border-radius: 4px;
             font-size: 0.8rem;
             font-weight: bold;
+            text-transform: uppercase;
         }
-        .badge-stavka { background: #ea580c; color: #fff; }
-        .badge-bb { background: #dc2626; color: #fff; }
+        .badge-stavka { background: #3b82f6; color: #fff; }
+        .badge-bb { background: #ef4444; color: #fff; }
 
         .btn-logout {
             background: #334155;
             color: #fff;
             border: none;
             padding: 8px 16px;
-            border-radius: 6px;
+            border-radius: 4px;
             cursor: pointer;
             font-weight: 600;
         }
         .btn-logout:hover { background: #475569; }
 
         .role-content {
-            background: rgba(15, 23, 42, 0.6);
+            background: #111420;
             padding: 20px;
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 8px;
+            border: 1px solid #3b82f6;
             margin-top: 15px;
+        }
+
+        /* Сетка для вывода карточек */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .card-item {
+            background: #161b26;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            overflow: hidden;
+            text-align: center;
+            padding: 10px;
+        }
+
+        .card-item img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 4px;
+            background: #0b0d14;
         }
     </style>
 </head>
@@ -204,28 +223,22 @@
     <!-- Окно 1: РЕГИСТРАЦИЯ -->
     <div class="window-card active" id="registerWindow">
         <h1>Регистрация</h1>
-        <p class="subtitle">Создайте новый аккаунт</p>
+        <p class="subtitle">Создайте аккаунт в системе</p>
         <div class="error-msg" id="regError"></div>
 
         <div class="input-group">
             <label>Никнейм</label>
-            <input type="text" id="regNickname" placeholder="Введите никнейм" autocomplete="off">
+            <input type="text" id="regNickname" autocomplete="off">
         </div>
         <div class="input-group">
             <label>Пароль</label>
-            <input type="password" id="regPassword" placeholder="Придумайте пароль">
+            <input type="password" id="regPassword">
         </div>
 
-        <label style="text-align: left; display: block; margin-bottom: 8px;">Выберите ваш профиль</label>
+        <label style="text-align: left; display: block; margin-bottom: 8px;">Выберите профиль</label>
         <div class="profile-selection">
-            <div class="profile-option" onclick="selectRegProfile('Ставочник', this)">
-                <div class="profile-icon">🧡</div>
-                <div class="profile-title">Ставочник</div>
-            </div>
-            <div class="profile-option" onclick="selectRegProfile('Работник BB', this)">
-                <div class="profile-icon">❤️</div>
-                <div class="profile-title">Работник BB</div>
-            </div>
+            <div class="profile-option" onclick="selectRegProfile('Ставочник', this)">Ставочник</div>
+            <div class="profile-option" onclick="selectRegProfile('Работник BB', this)">Работник BB</div>
         </div>
 
         <button class="btn-submit" onclick="handleRegister()">Зарегистрироваться</button>
@@ -242,11 +255,11 @@
 
         <div class="input-group">
             <label>Никнейм</label>
-            <input type="text" id="loginNickname" placeholder="Ваш никнейм" autocomplete="off">
+            <input type="text" id="loginNickname" autocomplete="off">
         </div>
         <div class="input-group">
             <label>Пароль</label>
-            <input type="password" id="loginPassword" placeholder="Ваш пароль">
+            <input type="password" id="loginPassword">
         </div>
 
         <button class="btn-submit" onclick="handleLogin()">Войти в аккаунт</button>
@@ -259,7 +272,7 @@
     <div class="window-card cabinet-card" id="cabinetWindow">
         <div class="cab-header">
             <div>
-                <h2 id="userHello" style="color: #fff; font-size: 1.5rem;">Привет!</h2>
+                <h2 id="userHello" style="color: #fff; font-size: 1.5rem;">Привет</h2>
                 <div style="margin-top: 5px;">
                     <span id="userBadge" class="badge">Роль</span>
                 </div>
@@ -270,52 +283,4 @@
         <div id="cabinetBody"></div>
     </div>
 
-    <!-- СКРИПТЫ — ТЕПЕРЬ ВСЁ СТРОГО СБАЛАНСИРОВАНО -->
-    <script>
-        let selectedRegProfile = "";
-        let activeStavkaTab = "cards"; 
-
-        // Старт: проверка сессии
-        window.onload = function() {
-            const currentSession = JSON.parse(localStorage.getItem('activeSession'));
-            if (currentSession) {
-                openCabinet(currentSession.nickname, currentSession.profile);
-            }
-        };
-
-        // Навигация по окнам
-        function switchWindow(windowId) {
-            document.querySelectorAll('.window-card').forEach(w => w.classList.remove('active'));
-            document.getElementById(windowId).classList.add('active');
-            clearErrors();
-        }
-
-        function clearErrors() {
-            document.getElementById('regError').style.display = 'none';
-            document.getElementById('loginError').style.display = 'none';
-        }
-
-        // Выбор карточки профиля
-        function selectRegProfile(profileName, element) {
-            document.querySelectorAll('#registerWindow .profile-option').forEach(opt => opt.classList.remove('active'));
-            element.classList.add('active');
-            selectedRegProfile = profileName;
-            document.getElementById('regError').style.display = 'none';
-        }
-
-        // ОБРАБОТКА РЕГИСТРАЦИИ
-        function handleRegister() {
-            const nickname = document.getElementById('regNickname').value.trim();
-            const password = document.getElementById('regPassword').value.trim();
-            const errBox = document.getElementById('regError');
-
-            if (!nickname || !password || !selectedRegProfile) {
-                errBox.innerText = "Заполните все поля и выберите профиль!";
-                errBox.style.display = "block";
-                return;
-            }
-
-            let users = JSON.parse(localStorage.getItem('usersDatabase')) || [];
-
-            if (users.some(u => u.nickname.toLowerCase() === nickname.toLowerCase())) {
 
