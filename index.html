@@ -124,6 +124,7 @@
             const session = JSON.parse(localStorage.getItem('activeSession'));
             if (session) openCabinet(session.nickname, session.profile);
         };
+        window.addEventListener('storage', function(e) { if (e.key === 'usersDatabase' || e.key === 'teamImagesDatabase') { const session = JSON.parse(localStorage.getItem('activeSession')); if (session) openCabinet(session.nickname, session.profile); } });
 
         function switchWindow(id) {
             document.querySelectorAll('.window-card').forEach(w => w.classList.remove('active'));
@@ -429,7 +430,7 @@
             body.innerHTML = "<div class='role-content'><h3>Управление карточками: " + targetNick + "</h3><div style='margin:15px 0;'><label>Выберите карточку (PNG):</label><input type='file' id='newCardFile' accept='.png' style='margin-bottom:10px; background:#070a14; border:1px solid #475569; padding:10px; width:100%; color:#fff; border-radius:4px;'><button class='btn-submit' style='margin-top:10px; margin-bottom:0;' onclick='addCardToUser(\"" + targetNick + "\")'>Загрузить PNG карточку</button></div><h4>Текущие карточки пользователя:</h4>" + cardsHtml + "<button class='btn-logout' style='width:100%;margin-top:20px;' onclick='returnToBBPanel()'>Назад к списку</button></div>";
         }
 
-        function addCardToUser(targetNick) {
+               function addCardToUser(targetNick) {
             const fileInput = document.getElementById('newCardFile');
             if (!fileInput || fileInput.files.length === 0) { alert('Выберите PNG файл!'); return; }
             const file = fileInput.files[0];
@@ -439,7 +440,8 @@
                 let users = JSON.parse(localStorage.getItem('usersDatabase')) || [];
                 const index = users.findIndex(u => u.nickname === targetNick);
                 if (index !== -1) {
-                    if (!users[index].cards) users[index].cards = [];
+                    // Жесткая проверка: создаем массив, если его нет, и пушим новую карту
+                    if (!users[index].cards) { users[index].cards = []; }
                     users[index].cards.push(base64Data);
                     localStorage.setItem('usersDatabase', JSON.stringify(users));
                     alert('PNG карточка успешно загружена!');
