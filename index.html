@@ -629,7 +629,29 @@
                     let loseVal = predicts[stageId + "_lose"] || "";
                     let cardVal = predicts[stageId + "_card"] || "";
                     let disabledAttr = isPreviewAdmin ? "disabled" : "";
-                    return "<div class='matchup'><div class='matchup-title'>" + stageTitle + "</div><div class='predict-row'><div class='predict-select-group'><label style='width:90px;'>Победитель:</label><select " + disabledAttr + " onchange='savePlayoffSelect(\"" + nick + "\", \"" + stageId + "_win\", this.value)'>" + selectOptions.replace("value='" + winVal + "'", "value='" + winVal + "' selected") + "</select></div><div class='predict-select-group'><label style='width:90px;'>Проигравший:</label><select " + disabledAttr + " onchange='savePlayoffSelect(\"" + nick + "\", \"" + stageId + "_lose\", this.value)'>" + selectOptions.replace("value='" + loseVal + "'", "value='" + loseVal + "' selected") + "</select></div><div class='predict-select-group' style='margin-top:5px;'><label style='width:90px;'>URL Карты:</label><input type='text' " + disabledAttr + " placeholder='Ссылка на особую карточку' value='" + cardVal + "' onchange='savePlayoffCard(\"" + nick + "\", \"" + stageId + "\", this.value)' style='background: #161b26; border: 1px solid #475569; padding: 6px; color: #fff; border-radius: 4px; font-size: 0.85rem;'></div>" + (cardVal ? "<div class='team-card-preview'>Прикрепленная карта: <a href='" + cardVal + "' target='_blank' style='color:#3b82f6;'>Открыть картинку</a></div>" : "") + "</div></div>";
+                    
+                    // Если это админ просматривает, скрываем кнопку загрузки
+                    let fileInputHtml = isPreviewAdmin ? "" : 
+                        "<input type='file' accept='.png' onchange='handlePlayoffFileLoad(\"" + nick + "\", \"" + stageId + "\", this)' style='background: #161b26; border: 1px solid #475569; padding: 6px; color: #fff; border-radius: 4px; font-size: 0.85rem; width:100%;'>";
+
+                    return "<div class='matchup'>" +
+                        "<div class='matchup-title'>" + stageTitle + "</div>" +
+                        "<div class='predict-row'>" +
+                            "<div class='predict-select-group'>" +
+                                "<label style='width:90px;'>Победитель:</label>" +
+                                "<select " + disabledAttr + " onchange='savePlayoffSelect(\"" + nick + "\", \"" + stageId + "_win\", this.value)'>" + selectOptions.replace("value='" + winVal + "'", "value='" + winVal + "' selected") + "</select>" +
+                            "</div>" +
+                            "<div class='predict-select-group'>" +
+                                "<label style='width:90px;'>Проигравший:</label>" +
+                                "<select " + disabledAttr + " onchange='savePlayoffSelect(\"" + nick + "\", \"" + stageId + "_lose\", this.value)'>" + selectOptions.replace("value='" + loseVal + "'", "value='" + loseVal + "' selected") + "</select>" +
+                            "</div>" +
+                            "<div class='predict-row' style='margin-top:5px;'>" +
+                                "<label style='font-size:0.85rem;color:#cbd5e1;'>Особая карточка команды (PNG):</label>" +
+                                fileInputHtml +
+                            "</div>" +
+                            (cardVal ? "<div class='card-item' style='margin-top:10px; max-width:120px;'><img src='" + cardVal + "' alt='Team Card' style='height:100px;'></div>" : "") +
+                        "</div>" +
+                    "</div>";
                 }
 
                 let bracketHtml = "<div class='bracket-container'><div class='bracket-stage'><h4>1/4 Четвертьфинал</h4>" + buildStageHtml("q1", "Матч 1") + buildStageHtml("q2", "Матч 2") + "</div><div class='bracket-stage'><h4>1/2 Полуфинал</h4>" + buildStageHtml("h1", "Полуфинал 1") + "</div><div class='bracket-stage'><h4>Финал</h4>" + buildStageHtml("f1", "Главный Финал") + "</div></div>";
@@ -665,17 +687,32 @@
                 localStorage.setItem('usersDatabase', JSON.stringify(users));
             }
         }
-        function savePlayoffCard(nick, stageId, url) {
+                function handlePlayoffFileLoad(nick, stageId, input) {
+            if (!input.files || input.files.length === 0) return;
+            
+            const file = input.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const base64Data = e.target.result;
+                savePlayoffCard(nick, stageId, base64Data);
+            };
+            
+            reader.readAsDataURL(file);
+        }
+
+        function savePlayoffCard(nick, stageId, base64Data) {
             let users = JSON.parse(localStorage.getItem('usersDatabase')) || [];
             const index = users.findIndex(u => u.nickname === nick);
             if (index !== -1) {
                 if (!users[index].predicts) users[index].predicts = {};
                 const currentPredicts = users[index].predicts;
-                if (url !== "") {
+                
+                if (base64Data !== "") {
                     const stages = ["q1", "q2", "h1", "f1"];
                     let isDuplicate = false;
                     stages.forEach(st => {
-                        if (st !== stageId && currentPredicts[st + "_card"] === url) isDuplicate = true;
+                        if (st !== stageId && currentPredicts[st + "_card"] === base64Data) isDuplicate = true;
                     });
                     if (isDuplicate) {
                         alert('Эту особую карточку конкретной команды можно добавить лишь один раз!');
@@ -683,7 +720,7 @@
                         return;
                     }
                 }
-                currentPredicts[stageId + "_card"] = url;
+                currentPredicts[stageId + "_card"] = base64Data;
                 localStorage.setItem('usersDatabase', JSON.stringify(users));
                 openCabinet(nick, 'Ставочник');
             }
@@ -705,21 +742,34 @@
                 user.cards.forEach(url => { cardsHtml += "<div class='card-item'><img src='" + url + "' alt='Card'></div>"; });
                 cardsHtml += "</div>";
             }
-            body.innerHTML = "<div class='role-content'><h3>Управление карточками: " + targetNick + "</h3><div style='margin:15px 0;'><label>Вставьте URL картинки:</label><input type='text' id='newCardUrl' placeholder='https://example.com' style='margin-bottom:10px; background:#070a14; border:1px solid #475569; padding:10px; width:100%; color:#fff; border-radius:4px;'><button class='btn-submit' style='margin-top:10px; margin-bottom:0;' onclick='addCardToUser(\"" + targetNick + "\")'>Добавить карточку</button></div><h4>Текущие карточки пользователя:</h4>" + cardsHtml + "<button class='btn-logout' style='width:100%;margin-top:20px;' onclick='returnToBBPanel()'>Назад к списку</button></div>";
+            body.innerHTML = "<div class='role-content'><h3>Управление карточками: " + targetNick + "</h3><div style='margin:15px 0;'><label>Выберите карточку (только PNG):</label><input type='file' id='newCardFile' accept='.png' style='margin-bottom:10px; background:#070a14; border:1px solid #475569; padding:10px; width:100%; color:#fff; border-radius:4px;'><button class='btn-submit' style='margin-top:10px; margin-bottom:0;' onclick='addCardToUser(\"" + targetNick + "\")'>Загрузить PNG карточку</button></div><h4>Текущие карточки пользователя:</h4>" + cardsHtml + "<button class='btn-logout' style='width:100%;margin-top:20px;' onclick='returnToBBPanel()'>Назад к списку</button></div>";
         }
 
         function addCardToUser(targetNick) {
-            const url = document.getElementById('newCardUrl').value.trim();
-            if (!url) { alert('Введите ссылку на картинку!'); return; }
-            let users = JSON.parse(localStorage.getItem('usersDatabase')) || [];
-            const index = users.findIndex(u => u.nickname === targetNick);
-            if (index !== -1) {
-                if (!users[index].cards) users[index].cards = [];
-                users[index].cards.push(url);
-                localStorage.setItem('usersDatabase', JSON.stringify(users));
-                alert('Карточка успешно добавлена!');
-                manageUserCards(targetNick);
+            const fileInput = document.getElementById('newCardFile');
+            if (!fileInput || fileInput.files.length === 0) { 
+                alert('Выберите PNG файл на компьютере!'); 
+                return; 
             }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const base64Data = e.target.result;
+                let users = JSON.parse(localStorage.getItem('usersDatabase')) || [];
+                const index = users.findIndex(u => u.nickname === targetNick);
+                
+                if (index !== -1) {
+                    if (!users[index].cards) users[index].cards = [];
+                    users[index].cards.push(base64Data);
+                    localStorage.setItem('usersDatabase', JSON.stringify(users));
+                    alert('PNG карточка успешно загружена!');
+                    manageUserCards(targetNick);
+                }
+            };
+
+            reader.readAsDataURL(file);
         }
 
         function returnToBBPanel() {
