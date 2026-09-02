@@ -5,6 +5,122 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fantasy League BB</title>
     <style>
+                /* Стили для вкладок внутри личного кабинета */
+        .tab-menu {
+            display: flex;
+            background: #0b0f19;
+            padding: 4px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border: 1px solid #475569;
+        }
+
+        .tab-btn {
+            flex: 1;
+            background: transparent;
+            color: #94a3b8;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .tab-btn.active {
+            background: #2563eb;
+            color: #ffffff;
+        }
+
+        .tab-btn.active-red {
+            background: #dc2626;
+            color: #ffffff;
+        }
+
+        /* Форма добавления карточек ставочником */
+        .add-card-box {
+            background: #161b26;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #475569;
+            margin-bottom: 20px;
+        }
+
+        /* Стили для структуры турнирной сетки Плей-Офф */
+        .bracket-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .bracket-stage {
+            background: #161b26;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #475569;
+        }
+
+        .bracket-stage h4 {
+            color: #2563eb;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #475569;
+            padding-bottom: 5px;
+        }
+
+        .matchup {
+            background: #0b0f19;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            border-left: 3px solid #dc2626;
+        }
+
+        .matchup-title {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .predict-row {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .predict-select-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .predict-select-group select {
+            flex: 1;
+            padding: 8px;
+            background: #161b26;
+            border: 1px solid #475569;
+            color: #ffffff;
+            border-radius: 4px;
+            outline: none;
+        }
+
+        .predict-select-group input {
+            flex: 1;
+            padding: 8px;
+        }
+
+        .team-card-preview {
+            font-size: 0.8rem;
+            color: #2563eb;
+            margin-top: 4px;
+            word-break: break-all;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -285,6 +401,22 @@
     </div>
     <script>
         let selectedRegProfile = "";
+        
+        // Переменные для навигации по новым вкладкам
+        let activeMainTab = "cards"; // Может быть: cards или fantasy
+        let activeFantasySubTab = "players"; // Может быть: players или playoff
+
+        // Список 8 команд для Плей-Офф (ты сможешь переименовать их здесь)
+        const playoffTeams = [
+            "Команда 1",
+            "Команда 2",
+            "Команда 3",
+            "Команда 4",
+            "Команда 5",
+            "Команда 6",
+            "Команда 7",
+            "Команда 8"
+        ];
 
         // Проверка активной сессии при загрузке страницы
         window.onload = function() {
@@ -308,6 +440,18 @@
             el.classList.add('active');
             selectedRegProfile = profile;
         }
+                // Функция переключения основных вкладок кабинета
+        function switchMainTab(tabName, nick, profile) {
+            activeMainTab = tabName;
+            openCabinet(nick, profile);
+        }
+
+        // Функция переключения подвкладок внутри Фэнтези-Лиги
+        function switchFantasySubTab(subTabName, nick, profile) {
+            activeFantasySubTab = subTabName;
+            openCabinet(nick, profile);
+        }
+
         // ОБРАБОТКА РЕГИСТРАЦИИ
         function handleRegister() {
             const nick = document.getElementById('regNickname').value.trim();
@@ -386,6 +530,7 @@
             document.querySelectorAll('#registerWindow .profile-option').forEach(o => o.classList.remove('active'));
         }
         // ОТКРЫТИЕ ЛИЧНОГО КАБИНЕТА
+                // ГЛАВНАЯ ФУНКЦИЯ ОТРИСОВКИ ЛИЧНОГО КАБИНЕТА
         function openCabinet(nick, profile) {
             switchWindow('cabinetWindow');
             document.getElementById('userHello').innerText = "Привет, " + nick + "!";
@@ -393,24 +538,46 @@
             badge.innerText = profile;
             const body = document.getElementById('cabinetBody');
 
+            // Генерация верхнего меню вкладок для личного кабинета
+            let tabMenuHtml = "" +
+                "<div class='tab-menu'>" +
+                    "<button class='tab-btn " + (activeMainTab === "cards" ? "active" : "") + "' onclick='switchMainTab(\"cards\", \"" + nick + "\", \"" + profile + "\")'>Карточки</button>" +
+                    "<button class='tab-btn " + (activeMainTab === "fantasy" ? "active" : "") + "' onclick='switchMainTab(\"fantasy\", \"" + nick + "\", \"" + profile + "\")'>Фэнтези-Лига</button>" +
+                "</div>";
+
             if (profile === 'Ставочник') {
                 badge.className = "badge badge-stavka";
                 let users = JSON.parse(localStorage.getItem('usersDatabase')) || [];
-                const user = users.find(u => u.nickname === nick) || { cards: [] };
-                
-                let cardsHtml = "";
-                if (!user.cards || user.cards.length === 0) {
-                    cardsHtml = "<p style='color:#94a3b8;'>У вас пока нет добавленных карточек.</p>";
-                } else {
-                    cardsHtml = "<div class='cards-grid'>";
-                    user.cards.forEach(url => {
-                        cardsHtml += "<div class='card-item'><img src='" + url + "' alt='Card'><div style='font-size:0.8rem;margin-top:5px;color:#94a3b8;'>Добавлено админом</div></div>";
-                    });
-                    cardsHtml += "</div>";
+                const user = users.find(u => u.nickname === nick) || { cards: [], predicts: {} };
+
+                if (activeMainTab === "cards") {
+                    // Раздел: Карточки Ставочника
+                    let cardsHtml = "";
+                    if (!user.cards || user.cards.length === 0) {
+                        cardsHtml = "<p style='color:#94a3b8;'>У вас пока нет добавленных карточек.</p>";
+                    } else {
+                        cardsHtml = "<div class='cards-grid'>";
+                        user.cards.forEach(url => {
+                            cardsHtml += "<div class='card-item'><img src='" + url + "' alt='Card'><div style='font-size:0.8rem;margin-top:5px;color:#94a3b8;'>Ваша карточка</div></div>";
+                        });
+                        cardsHtml += "</div>";
+                    }
+
+                    // Форма, где Ставочник может САМ добавить себе карточку по URL
+                    let addCardForm = "" +
+                        "<div class='add-card-box'>" +
+                            "<h4>Добавить свою карточку</h4>" +
+                            "<input type='text' id='selfCardUrl' placeholder='Вставьте URL картинки карточки' style='margin: 10px 0;'>" +
+                            "<button class='btn-submit' style='margin:0;' onclick='handleSelfAddCard(\"" + nick + "\")'>Добавить карточку</button>" +
+                        "</div>";
+
+                    body.innerHTML = tabMenuHtml + addCardForm + "<div class='role-content'><h3>Мои карточки</h3>" + cardsHtml + "</div>";
+
+                } else if (activeMainTab === "fantasy") {
+                    // Раздел: Фэнтези-Лига Ставочника
+                    renderFantasyLeagueBlock(body, tabMenuHtml, user, nick, profile, false);
                 }
 
-                body.innerHTML = "<div class='role-content'><h3>Опция: Карточки</h3><p style='color:#94a3b8;font-size:0.9rem;margin-top:5px;'>Здесь отображаются ваши игровые карточки:</p>" + cardsHtml + "</div>";
-            
             } else if (profile === 'Работник BB') {
                 badge.className = "badge badge-bb";
                 let users = JSON.parse(localStorage.getItem('usersDatabase')) || [];
@@ -421,40 +588,138 @@
                     listHtml = "<p style='color:#94a3b8;margin-top:10px;'>Ставочников пока нет в базе.</p>";
                 } else {
                     stavshiki.forEach(u => {
-                        listHtml += "<div class='user-row'><div><strong>" + u.nickname + "</strong><br><span style='font-size:0.8rem;color:#94a3b8;'>Карточек: " + (u.cards ? u.cards.length : 0) + "</span></div><button class='btn-small' onclick='manageUserCards(\"" + u.nickname + "\")'>Управлять</button></div>";
+                        listHtml += "" +
+                            "<div class='user-row'>" +
+                                "<div>" +
+                                    "<strong>" + u.nickname + "</strong><br>" +
+                                    "<span style='font-size:0.8rem;color:#94a3b8;'>Карточек: " + (u.cards ? u.cards.length : 0) + "</span>" +
+                                "</div>" +
+                                "<div>" +
+                                    "<button class='btn-small' style='margin-right:8px; background:#dc2626;' onclick='viewUserFantasy(\"" + u.nickname + "\")'>Фэнтези</button>" +
+                                    "<button class='btn-small' onclick='manageUserCards(\"" + u.nickname + "\")'>Карточки</button>" +
+                                "</div>" +
+                            "</div>";
                     });
                 }
 
-                body.innerHTML = "<div class='role-content'><h3>Панель Работника BB</h3><p style='color:#94a3b8;font-size:0.9rem;'>Управление профилями Ставочников и добавление карточек:</p><div style='margin-top:15px;'>" + listHtml + "</div></div>";
+                body.innerHTML = "<div class='role-content'><h3>Панель Работника BB</h3><p style='color:#94a3b8;font-size:0.9rem;'>Управление профилями Ставочников:</p><div style='margin-top:15px;'> " + listHtml + "</div></div>";
+            }
+        }
+        // ФУНКЦИЯ ОТРИСОВКИ БЛОКА ФЭНТЕЗИ-ЛИГИ
+        function renderFantasyLeagueBlock(container, mainTemplateHtml, user, nick, profile, isPreviewAdmin) {
+            let activeColorClass = isPreviewAdmin ? "active-red" : "active";
+            let subMenuHtml = "<div class='tab-menu' style='margin-top:10px; border-color:#2563eb;'><button class='tab-btn " + (activeFantasySubTab === "players" ? activeColorClass : "") + "' onclick='switchFantasySubTab(\"players\", \"" + nick + "\", \"" + profile + "\")'>Игроки</button><button class='tab-btn " + (activeFantasySubTab === "playoff" ? activeColorClass : "") + "' onclick='switchFantasySubTab(\"playoff\", \"" + nick + "\", \"" + profile + "\")'>Плей-Офф</button></div>";
+            let contentHtml = "";
+
+            if (activeFantasySubTab === "players") {
+                let playerCardsHtml = "";
+                let userCards = user.cards || [];
+                if (userCards.length === 0) {
+                    playerCardsHtml = "<p style='color:#94a3b8;'>Вы еще не добавили ни одной карточки в личном кабинете.</p>";
+                } else {
+                    playerCardsHtml = "<div class='cards-grid'>";
+                    let limit = Math.min(userCards.length, 3);
+                    for (let i = 0; i < limit; i++) {
+                        playerCardsHtml += "<div class='card-item'><img src='" + userCards[i] + "' alt='Card'><div style='font-size:0.8rem;margin-top:5px;color:#94a3b8;'>Игрок " + (i + 1) + "</div></div>";
+                    }
+                    playerCardsHtml += "</div>";
+                }
+                contentHtml = "<div class='role-content'><h3>Фэнтези-Лига: Игроки</h3><p style='color:#94a3b8;font-size:0.9rem;margin-top:5px;'>Здесь отображаются первые 3 карточки, добавленные вами самостоятельно или админом:</p>" + playerCardsHtml + "</div>";
+            }
+            else if (activeFantasySubTab === "playoff") {
+                let predicts = user.predicts || {};
+                let selectOptions = "<option value=''>Выберите команду...</option>";
+                playoffTeams.forEach(team => { selectOptions += "<option value='" + team + "'>" + team + "</option>"; });
+
+                function buildStageHtml(stageId, stageTitle) {
+                    let winVal = predicts[stageId + "_win"] || "";
+                    let loseVal = predicts[stageId + "_lose"] || "";
+                    let cardVal = predicts[stageId + "_card"] || "";
+                    let disabledAttr = isPreviewAdmin ? "disabled" : "";
+                    return "<div class='matchup'><div class='matchup-title'>" + stageTitle + "</div><div class='predict-row'><div class='predict-select-group'><label style='width:90px;'>Победитель:</label><select " + disabledAttr + " onchange='savePlayoffSelect(\"" + nick + "\", \"" + stageId + "_win\", this.value)'>" + selectOptions.replace("value='" + winVal + "'", "value='" + winVal + "' selected") + "</select></div><div class='predict-select-group'><label style='width:90px;'>Проигравший:</label><select " + disabledAttr + " onchange='savePlayoffSelect(\"" + nick + "\", \"" + stageId + "_lose\", this.value)'>" + selectOptions.replace("value='" + loseVal + "'", "value='" + loseVal + "' selected") + "</select></div><div class='predict-select-group' style='margin-top:5px;'><label style='width:90px;'>URL Карты:</label><input type='text' " + disabledAttr + " placeholder='Ссылка на особую карточку' value='" + cardVal + "' onchange='savePlayoffCard(\"" + nick + "\", \"" + stageId + "\", this.value)' style='background: #161b26; border: 1px solid #475569; padding: 6px; color: #fff; border-radius: 4px; font-size: 0.85rem;'></div>" + (cardVal ? "<div class='team-card-preview'>Прикрепленная карта: <a href='" + cardVal + "' target='_blank' style='color:#3b82f6;'>Открыть картинку</a></div>" : "") + "</div></div>";
+                }
+
+                let bracketHtml = "<div class='bracket-container'><div class='bracket-stage'><h4>1/4 Четвертьфинал</h4>" + buildStageHtml("q1", "Матч 1") + buildStageHtml("q2", "Матч 2") + "</div><div class='bracket-stage'><h4>1/2 Полуфинал</h4>" + buildStageHtml("h1", "Полуфинал 1") + "</div><div class='bracket-stage'><h4>Финал</h4>" + buildStageHtml("f1", "Главный Финал") + "</div></div>";
+                contentHtml = "<div class='role-content'><h3>Фэнтези-Лига: Плей-Офф Сетка</h3><p style='color:#94a3b8;font-size:0.9rem;margin-bottom:10px;'>Спрогнозируйте исходы матчей и добавьте особые карточки команд (карту одной команды можно использовать только один раз):</p>" + bracketHtml + "</div>";
+            }
+
+            if (isPreviewAdmin) {
+                container.innerHTML = mainTemplateHtml + subMenuHtml + contentHtml + "<button class='btn-logout' style='width:100%;margin-top:20px;' onclick='returnToBBPanel()'>Назад к списку</button>";
+            } else {
+                container.innerHTML = mainTemplateHtml + subMenuHtml + contentHtml;
+            }
+        }
+        function handleSelfAddCard(nick) {
+            const url = document.getElementById('selfCardUrl').value.trim();
+            if (!url) { alert('Введите ссылку на картинку!'); return; }
+            let users = JSON.parse(localStorage.getItem('usersDatabase')) || [];
+            const index = users.findIndex(u => u.nickname === nick);
+            if (index !== -1) {
+                if (!users[index].cards) users[index].cards = [];
+                users[index].cards.push(url);
+                localStorage.setItem('usersDatabase', JSON.stringify(users));
+                alert('Карточка успешно добавлена!');
+                openCabinet(nick, 'Ставочник');
             }
         }
 
-        // ПАНЕЛЬ УПРАВЛЕНИЯ КАРТОЧКАМИ КОНКРЕТНОГО СТАВОЧНИКА
+        function savePlayoffSelect(nick, key, value) {
+            let users = JSON.parse(localStorage.getItem('usersDatabase')) || [];
+            const index = users.findIndex(u => u.nickname === nick);
+            if (index !== -1) {
+                if (!users[index].predicts) users[index].predicts = {};
+                users[index].predicts[key] = value;
+                localStorage.setItem('usersDatabase', JSON.stringify(users));
+            }
+        }
+        function savePlayoffCard(nick, stageId, url) {
+            let users = JSON.parse(localStorage.getItem('usersDatabase')) || [];
+            const index = users.findIndex(u => u.nickname === nick);
+            if (index !== -1) {
+                if (!users[index].predicts) users[index].predicts = {};
+                const currentPredicts = users[index].predicts;
+                if (url !== "") {
+                    const stages = ["q1", "q2", "h1", "f1"];
+                    let isDuplicate = false;
+                    stages.forEach(st => {
+                        if (st !== stageId && currentPredicts[st + "_card"] === url) isDuplicate = true;
+                    });
+                    if (isDuplicate) {
+                        alert('Эту особую карточку конкретной команды можно добавить лишь один раз!');
+                        openCabinet(nick, 'Ставочник');
+                        return;
+                    }
+                }
+                currentPredicts[stageId + "_card"] = url;
+                localStorage.setItem('usersDatabase', JSON.stringify(users));
+                openCabinet(nick, 'Ставочник');
+            }
+        }
+        function viewUserFantasy(targetNick) {
+            let users = JSON.parse(localStorage.getItem('usersDatabase')) || [];
+            const user = users.find(u => u.nickname === targetNick) || { cards: [], predicts: {} };
+            const body = document.getElementById('cabinetBody');
+            let templateHtml = "<div style='background:rgba(37, 99, 235, 0.1); border:1px dashed #2563eb; padding:10px; border-radius:4px; margin-bottom:15px; font-size:0.9rem; color:#3b82f6; font-weight:500;'>Вы просматриваете Фэнтези-Лигу пользователя: <strong>" + targetNick + "</strong></div>";
+            renderFantasyLeagueBlock(body, templateHtml, user, targetNick, 'Работник BB', true);
+        }
         function manageUserCards(targetNick) {
             const body = document.getElementById('cabinetBody');
             let users = JSON.parse(localStorage.getItem('usersDatabase')) || [];
             const user = users.find(u => u.nickname === targetNick);
-
             let cardsHtml = "";
             if (user.cards && user.cards.length > 0) {
                 cardsHtml = "<div class='cards-grid'>";
-                user.cards.forEach(url => {
-                    cardsHtml += "<div class='card-item'><img src='" + url + "' alt='Card'></div>";
-                });
+                user.cards.forEach(url => { cardsHtml += "<div class='card-item'><img src='" + url + "' alt='Card'></div>"; });
                 cardsHtml += "</div>";
             }
-
             body.innerHTML = "<div class='role-content'><h3>Управление карточками: " + targetNick + "</h3><div style='margin:15px 0;'><label>Вставьте URL картинки:</label><input type='text' id='newCardUrl' placeholder='https://example.com' style='margin-bottom:10px; background:#070a14; border:1px solid #475569; padding:10px; width:100%; color:#fff; border-radius:4px;'><button class='btn-submit' style='margin-top:10px; margin-bottom:0;' onclick='addCardToUser(\"" + targetNick + "\")'>Добавить карточку</button></div><h4>Текущие карточки пользователя:</h4>" + cardsHtml + "<button class='btn-logout' style='width:100%;margin-top:20px;' onclick='returnToBBPanel()'>Назад к списку</button></div>";
         }
 
-        // ФУНКЦИЯ ДОБАВЛЕНИЯ КАРТИНКИ КЛИЕНТУ
         function addCardToUser(targetNick) {
             const url = document.getElementById('newCardUrl').value.trim();
             if (!url) { alert('Введите ссылку на картинку!'); return; }
-
             let users = JSON.parse(localStorage.getItem('usersDatabase')) || [];
             const index = users.findIndex(u => u.nickname === targetNick);
-            
             if (index !== -1) {
                 if (!users[index].cards) users[index].cards = [];
                 users[index].cards.push(url);
@@ -464,7 +729,6 @@
             }
         }
 
-        // ВОЗВРАТ АДМИНА К СПИСКУ СТАВОЧНИКОВ
         function returnToBBPanel() {
             const session = JSON.parse(localStorage.getItem('activeSession'));
             openCabinet(session.nickname, session.profile);
@@ -472,6 +736,7 @@
     </script>
 </body>
 </html>
+
 
 
 
