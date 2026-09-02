@@ -272,10 +272,10 @@
     </div>
 
     <script>
-        
-        let selectedRegProfile = "";
+                let selectedRegProfile = "";
+        let activeStavkaTab = "cards"; 
 
-        // Инициализация: если юзер уже залогинен, сразу кидаем в кабинет
+        // Старт: проверка сессии
         window.onload = function() {
             const currentSession = JSON.parse(localStorage.getItem('activeSession'));
             if (currentSession) {
@@ -283,7 +283,7 @@
             }
         };
 
-        // Переключение окон
+        // Навигация по окнам
         function switchWindow(windowId) {
             document.querySelectorAll('.window-card').forEach(w => w.classList.remove('active'));
             document.getElementById(windowId).classList.add('active');
@@ -295,7 +295,7 @@
             document.getElementById('loginError').style.display = 'none';
         }
 
-        // Выбор профиля при регистрации
+        // Выбор карточки профиля
         function selectRegProfile(profileName, element) {
             document.querySelectorAll('#registerWindow .profile-option').forEach(opt => opt.classList.remove('active'));
             element.classList.add('active');
@@ -303,7 +303,7 @@
             document.getElementById('regError').style.display = 'none';
         }
 
-        // РЕГИСТРАЦИЯ
+        // ОБРАБОТКА РЕГИСТРАЦИИ
         function handleRegister() {
             const nickname = document.getElementById('regNickname').value.trim();
             const password = document.getElementById('regPassword').value.trim();
@@ -315,249 +315,180 @@
                 return;
             }
 
-            // Получаем базу пользователей из localStorage
             let users = JSON.parse(localStorage.getItem('usersDatabase')) || [];
 
-            // Проверка дубликатов никнейма
-
-<script>
-    let selectedRegProfile = "";
-
-    // Инициализация: если юзер уже залогинен, сразу кидаем в кабинет
-    window.onload = function() {
-        const currentSession = JSON.parse(localStorage.getItem('activeSession'));
-        if (currentSession) {
-            openCabinet(currentSession.nickname, currentSession.profile);
-        }
-    };
-
-    // Переключение окон
-    function switchWindow(windowId) {
-        document.querySelectorAll('.window-card').forEach(w => w.classList.remove('active'));
-        document.getElementById(windowId).classList.add('active');
-        clearErrors();
-    }
-
-    function clearErrors() {
-        document.getElementById('regError').style.display = 'none';
-        document.getElementById('loginError').style.display = 'none';
-    }
-
-    // Выбор профиля при регистрации
-    function selectRegProfile(profileName, element) {
-        document.querySelectorAll('#registerWindow .profile-option').forEach(opt => opt.classList.remove('active'));
-        element.classList.add('active');
-        selectedRegProfile = profileName;
-        document.getElementById('regError').style.display = 'none';
-    }
-
-    // РЕГИСТРАЦИЯ
-    function handleRegister() {
-        const nickname = document.getElementById('regNickname').value.trim();
-        const password = document.getElementById('regPassword').value.trim();
-        const errBox = document.getElementById('regError');
-
-        if (!nickname || !password || !selectedRegProfile) {
-            errBox.innerText = "Заполните все поля и выберите профиль!";
-            errBox.style.display = "block";
-            return;
-        }
-
-        // Получаем базу пользователей из localStorage
-        let users = JSON.parse(localStorage.getItem('usersDatabase')) || [];
-
-        // Проверка дубликатов никнейма
-        if (users.some(u => u.nickname.toLowerCase() === nickname.toLowerCase())) {
-            errBox.innerText = "Этот никнейм уже занят!";
-            errBox.style.display = "block";
-            return;
-        }
-
-        // Фейсконтроль для Работник BB
-        if (selectedRegProfile === 'Работник BB') {
-            const allowed = ['rrrassvet', 'TimeMine559'];
-            if (!allowed.includes(nickname)) {
-                errBox.innerText = "Доступ к профилю Работник BB запрещен для этого ника!";
+            if (users.some(u => u.nickname.toLowerCase() === nickname.toLowerCase())) {
+                errBox.innerText = "Этот никнейм уже занят!";
                 errBox.style.display = "block";
                 return;
             }
-        }
 
-        // Сохраняем нового чела в базу
-        users.push({ nickname, password, profile: selectedRegProfile });
-        localStorage.setItem('usersDatabase', JSON.stringify(users));
-
-        // Автоматически логиним после регистрации
-        localStorage.setItem('activeSession', JSON.stringify({ nickname, profile: selectedRegProfile }));
-        openCabinet(nickname, selectedRegProfile);
-    }
-
-    // ВХОД (АВТОРИЗАЦИЯ)
-    function handleLogin() {
-        const nickname = document.getElementById('loginNickname').value.trim();
-        const password = document.getElementById('loginPassword').value.trim();
-        const errBox = document.getElementById('loginError');
-
-        if (!nickname || !password) {
-            errBox.innerText = "Введите никнейм и пароль!";
-            errBox.style.display = "block";
-            return;
-        }
-
-        let users = JSON.parse(localStorage.getItem('usersDatabase')) || [];
-        
-        // Ищем пользователя в нашей локальной базе
-        const user = users.find(u => u.nickname.toLowerCase() === nickname.toLowerCase());
-
-        if (!user || user.password !== password) {
-            errBox.innerText = "Неверный никнейм или пароль!";
-            errBox.style.display = "block";
-            return;
-        }
-
-        // Если всё верно — создаем активную сессию
-        localStorage.setItem('activeSession', JSON.stringify({ nickname: user.nickname, profile: user.profile }));
-        openCabinet(user.nickname, user.profile);
-    }
-
-    // ВЫХОД
-    function handleLogout() {
-        localStorage.removeItem('activeSession');
-        switchWindow('loginWindow');
-        document.getElementById('regNickname').value = "";
-        document.getElementById('regPassword').value = "";
-        document.getElementById('loginNickname').value = "";
-        document.getElementById('loginPassword').value = "";
-    }
-
-            // ПЕРЕМЕННАЯ ДЛЯ ОТСЛЕЖИВАНИЯ АКТИВНОЙ ВКЛАДКИ У СТАВОЧНИКА
-    let activeStavkaTab = "cards"; 
-
-    // ОТКРЫТИЕ ЛИЧНОГО КАБИНЕТА
-    function openCabinet(nickname, profile) {
-        switchWindow('cabinetWindow');
-        document.getElementById('userHello').innerText = `Привет, ${nickname}!`;
-        
-        const badge = document.getElementById('userBadge');
-        badge.innerText = profile;
-        
-        const body = document.getElementById('cabinetBody');
-        
-        if (profile === 'Ставочник') {
-            badge.className = "badge badge-stavka";
-            renderStavshikTabs(body, nickname, false);
-        } else if (profile === 'Работник BB') {
-            badge.className = "badge badge-bb";
-            
-            // Вытаскиваем всех зарегистрированных ставочников для админки
-            let users = JSON.parse(localStorage.getItem('usersDatabase')) || [];
-            let stavshiki = users.filter(u => u.profile === 'Ставочник');
-            
-            let listHtml = "";
-            if (stavshiki.length === 0) {
-                listHtml = `<p style="color:#94a3b8; font-size:0.9rem; margin-top:10px;">Ставочников пока нет в базе.</p>`;
-            } else {
-                listHtml = `<ul style="list-style:none; margin-top:10px; display:flex; flex-direction:column; gap:8px;">`;
-                stavshiki.forEach(u => {
-                    listHtml += `
-                        <li style="background:#1e293b; padding:12px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
-                            <span style="font-weight:600; color:#fff;">👤 ${u.nickname}</span>
-                            <button onclick="viewStavshikCabinet('${u.nickname}')" style="background:#6366f1; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:0.85rem; font-weight:600;">Посмотреть кабинет</button>
-                        </li>
-                    `;
-                });
-                listHtml += `</ul>`;
+            if (selectedRegProfile === 'Работник BB') {
+                const allowed = ['rrrassvet', 'TimeMine559'];
+                if (!allowed.includes(nickname)) {
+                    errBox.innerText = "Доступ к профилю Работник BB запрещен для этого ника!";
+                    errBox.style.display = "block";
+                    return;
+                }
             }
 
-            body.innerHTML = `
-                <div class="role-content">
-                    <h3>🛠️ Панель Администрации BB</h3>
-                    <p style="margin-top:10px; color:#94a3b8;">Управление проектом и просмотр пользователей.</p>
-                    
-                    <h4 style="margin-top:20px; color:#fff; font-size:1.1rem; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:5px;">Список Ставочников:</h4>
-                    ${listHtml}
+            users.push({ nickname, password, profile: selectedRegProfile });
+            localStorage.setItem('usersDatabase', JSON.stringify(users));
+
+            localStorage.setItem('activeSession', JSON.stringify({ nickname, profile: selectedRegProfile }));
+            openCabinet(nickname, selectedRegProfile);
+        }
+
+        // ОБРАБОТКА ВХОДА
+        function handleLogin() {
+            const nickname = document.getElementById('loginNickname').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+            const errBox = document.getElementById('loginError');
+
+            if (!nickname || !password) {
+                errBox.innerText = "Введите никнейм и пароль!";
+                errBox.style.display = "block";
+                return;
+            }
+
+            let users = JSON.parse(localStorage.getItem('usersDatabase')) || [];
+            const user = users.find(u => u.nickname.toLowerCase() === nickname.toLowerCase());
+
+            if (!user || user.password !== password) {
+                errBox.innerText = "Неверный никнейм или пароль!";
+                errBox.style.display = "block";
+                return;
+            }
+
+            localStorage.setItem('activeSession', JSON.stringify({ nickname: user.nickname, profile: user.profile }));
+            openCabinet(user.nickname, user.profile);
+        }
+
+        // ВЫХОД ИЗ СИСТЕМЫ
+        function handleLogout() {
+            localStorage.removeItem('activeSession');
+            switchWindow('loginWindow');
+            document.getElementById('regNickname').value = "";
+            document.getElementById('regPassword').value = "";
+            document.getElementById('loginNickname').value = "";
+            document.getElementById('loginPassword').value = "";
+            selectedRegProfile = "";
+            document.querySelectorAll('#registerWindow .profile-option').forEach(opt => opt.classList.remove('active'));
+        }
+
+        // ЛОГИКА ОТКРЫТИЯ ЛИЧНОГО КАБИНЕТА
+        function openCabinet(nickname, profile) {
+            switchWindow('cabinetWindow');
+            document.getElementById('userHello').innerText = `Привет, ${nickname}!`;
+            
+            const badge = document.getElementById('userBadge');
+            badge.innerText = profile;
+            
+            const body = document.getElementById('cabinetBody');
+            
+            if (profile === 'Ставочник') {
+                badge.className = "badge badge-stavka";
+                renderStavshikTabs(body, nickname, false);
+            } else if (profile === 'Работник BB') {
+                badge.className = "badge badge-bb";
+                
+                let users = JSON.parse(localStorage.getItem('usersDatabase')) || [];
+                let stavshiki = users.filter(u => u.profile === 'Ставочник');
+                
+                let listHtml = "";
+                if (stavshiki.length === 0) {
+                    listHtml = `<p style="color:#94a3b8; font-size:0.9rem; margin-top:10px;">Ставочников пока нет в базе.</p>`;
+                } else {
+                    listHtml = `<ul style="list-style:none; margin-top:10px; display:flex; flex-direction:column; gap:8px;">`;
+                    stavshiki.forEach(u => {
+                        listHtml += `
+                            <li style="background:#1e293b; padding:12px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+                                <span style="font-weight:600; color:#fff;">👤 ${u.nickname}</span>
+                                <button onclick="viewStavshikCabinet('${u.nickname}')" style="background:#6366f1; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:0.85rem; font-weight:600;">Посмотреть кабинет</button>
+                            </li>
+                        `;
+                    });
+                    listHtml += `</ul>`;
+                }
+
+                body.innerHTML = `
+                    <div class="role-content">
+                        <h3>🛠️ Панель Администрации BB</h3>
+                        <p style="margin-top:10px; color:#94a3b8;">Управление проектом и просмотр пользователей.</p>
+                        
+                        <h4 style="margin-top:20px; color:#fff; font-size:1.1rem; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:5px;">Список Ставочников:</h4>
+                        ${listHtml}
+                    </div>
+                `;
+            }
+        }
+
+        // ОТРИСОВКА ВКЛАДОК СТАВОЧНИКА
+        function renderStavshikTabs(container, nickname, isPreview = false) {
+            const cardsContent = `
+                <div style="margin-top:15px; display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                    <div style="background:#1e293b; padding:15px; border-radius:10px; text-align:center;">
+                        <div style="font-size:2rem; margin-bottom:5px;">🃏</div>
+                        <div style="font-weight:bold; color:#fff;">Карточка #1</div>
+                        <div style="font-size:0.85rem; color:#ea580c; margin-top:5px;">Коэффициент: 2.45</div>
+                    </div>
+                    <div style="background:#1e293b; padding:15px; border-radius:10px; text-align:center;">
+                        <div style="font-size:2rem; margin-bottom:5px;">🃏</div>
+                        <div style="font-weight:bold; color:#fff;">Карточка #2</div>
+                        <div style="font-size:0.85rem; color:#ea580c; margin-top:5px;">Коэффициент: 1.80</div>
+                    </div>
                 </div>
             `;
+
+            const fantasyContent = `
+                <div style="margin-top:15px; background:#1e293b; padding:15px; border-radius:10px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <span style="font-weight:bold; color:#fff;">🏆 Ваша команда в Лиге</span>
+                        <span style="color:#22c55e; font-size:0.9rem; font-weight:600;">145 PTS</span>
+                    </div>
+                    <p style="font-size:0.85rem; color:#94a3b8;">Собирайте свой состав игроков, зарабатывайте очки на основе реальных матчей.</p>
+                </div>
+            `;
+
+            const activeContent = (activeStavkaTab === "cards") ? cardsContent : fantasyContent;
+
+            container.innerHTML = `
+                ${isPreview ? `
+                <div style="background:rgba(234, 88, 12, 0.1); border:1px dashed #ea580c; padding:10px; border-radius:8px; margin-bottom:15px; font-size:0.9rem; color:#f97316; font-weight:500;">
+                    👀 Вы просматриваете профиль пользователя <strong>${nickname}</strong>
+                </div>` : ''}
+
+                <div class="role-content">
+                    <h3>📈 Панель Аналитики Ставочника ${isPreview ? `(${nickname})` : ''}</h3>
+                    
+                    <div style="display:flex; background:#0f172a; padding:4px; border-radius:8px; margin-top:15px; gap:5px;">
+                        <button onclick="switchStavkaTab('cards', '${nickname}', ${isPreview})" style="flex:1; padding:8px; border:none; border-radius:6px; cursor:pointer; font-weight:600; font-size:0.9rem; background:${activeStavkaTab === 'cards' ? '#ea580c' : 'transparent'}; color:${activeStavkaTab === 'cards' ? '#fff' : '#94a3b8'};">
+                            🎴 Карточки
+                        </button>
+                    ${activeContent}
+                </div>
+
+                ${isPreview ? `
+                <button onclick="const ses = JSON.parse(localStorage.getItem('activeSession')); openCabinet(ses.nickname, ses.profile)" style="margin-top:20px; width:100%; background:#334155; color:#fff; border:none; padding:12px; border-radius:8px; cursor:pointer; font-weight:600;">
+                    ⬅️ Вернуться в панель BB
+                </button>` : ''}
+            `;
         }
-    }
 
-    // ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ ДЛЯ ОТРИСОВКИ ВКЛАДОК СТАВОЧНИКА
-    function renderStavshikTabs(container, nickname, isPreview = false) {
-        // Контент для вкладки Карточки
-        const cardsContent = `
-            <div style="margin-top:15px; display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-                <div style="background:#1e293b; padding:15px; border-radius:10px; border:1px solid rgba(255,255,255,0.05); text-align:center;">
-                    <div style="font-size:2rem; margin-bottom:5px;">🃏</div>
-                    <div style="font-weight:bold; color:#fff;">Карточка #1</div>
-                    <div style="font-size:0.85rem; color:#ea580c; margin-top:5px;">Коэффициент: 2.45</div>
-                </div>
-                <div style="background:#1e293b; padding:15px; border-radius:10px; border:1px solid rgba(255,255,255,0.05); text-align:center;">
-                    <div style="font-size:2rem; margin-bottom:5px;">🃏</div>
-                    <div style="font-weight:bold; color:#fff;">Карточка #2</div>
-                    <div style="font-size:0.85rem; color:#ea580c; margin-top:5px;">Коэффициент: 1.80</div>
-                </div>
-            </div>
-        `;
+        // Переключение вкладок
+        function switchStavkaTab(tabName, nickname, isPreview) {
+            activeStavkaTab = tabName;
+            const container = document.getElementById('cabinetBody');
+            renderStavshikTabs(container, nickname, isPreview);
+        }
 
-        // Контент для вкладки Фэнтези-Лига [1]
-        const fantasyContent = `
-            <div style="margin-top:15px; background:#1e293b; padding:15px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                    <span style="font-weight:bold; color:#fff;">🏆 Ваша команда в Лиге</span>
-                    <span style="color:#22c55e; font-size:0.9rem; font-weight:600;">145 PTS</span>
-                </div>
-                <p style="font-size:0.85rem; color:#94a3b8;">Собирайте свой состав игроков, зарабатывайте очки на основе реальных матчей и занимайте топ в таблице!</p>
-            </div>
-        `;
-
-        const activeContent = (activeStavkaTab === "cards") ? cardsContent : fantasyContent;
-
-        container.innerHTML = `
-            ${isPreview ? `
-            <div style="background:rgba(234, 88, 12, 0.1); border:1px dashed #ea580c; padding:10px; border-radius:8px; margin-bottom:15px; font-size:0.9rem; color:#f97316; font-weight:500;">
-                👀 Вы просматриваете профиль пользователя <strong>${nickname}</strong>
-            </div>` : ''}
-
-            <div class="role-content">
-                <h3>📈 Панель Аналитики Ставочника ${isPreview ? `(${nickname})` : ''}</h3>
-                
-                <!-- Меню опций -->
-                <div style="display:flex; background:#0f172a; padding:4px; border-radius:8px; margin-top:15px; gap:5px;">
-                    <button onclick="switchStavkaTab('cards', '${nickname}', ${isPreview})" style="flex:1; padding:8px; border:none; border-radius:6px; cursor:pointer; font-weight:600; font-size:0.9rem; background:${activeStavkaTab === 'cards' ? '#ea580c' : 'transparent'}; color:${activeStavkaTab === 'cards' ? '#fff' : '#94a3b8'}; transition:all 0.2s;">
-                        🎴 Карточки
-                    </button>
-                    <button onclick="switchStavkaTab('fantasy', '${nickname}', ${isPreview})" style="flex:1; padding:8px; border:none; border-radius:6px; cursor:pointer; font-weight:600; font-size:0.9rem; background:${activeStavkaTab === 'fantasy' ? '#ea580c' : 'transparent'}; color:${activeStavkaTab === 'fantasy' ? '#fff' : '#94a3b8'}; transition:all 0.2s;">
-                        🏆 Фэнтези-Лига
-                    </button>
-                </div>
-
-                <!-- Вывод активной опции -->
-                ${activeContent}
-            </div>
-
-            ${isPreview ? `
-            <button onclick="const ses = JSON.parse(localStorage.getItem('activeSession')); openCabinet(ses.nickname, ses.profile)" style="margin-top:20px; width:100%; background:#334155; color:#fff; border:none; padding:12px; border-radius:8px; cursor:pointer; font-weight:600;">
-                ⬅️ Вернуться в панель BB
-            </button>` : ''}
-        `;
-    }
-
-    // ФУНКЦИЯ ПЕРЕКЛЮЧЕНИЯ ОПЦИЙ ВНУТРИ СТАВОЧНИКА
-    function switchStavkaTab(tabName, nickname, isPreview) {
-        activeStavkaTab = tabName;
-        const container = document.getElementById('cabinetBody');
-        renderStavshikTabs(container, nickname, isPreview);
-    }
-
-    // РЕЖИМ ПРОСМОТРА ЧУЖОГО КАБИНЕТА АДМИНИСТРАТОРОМ
-    function viewStavshikCabinet(targetNickname) {
-        const body = document.getElementById('cabinetBody');
-        const badge = document.getElementById('userBadge');
-        
-        badge.className = "badge badge-stavka";
-        badge.innerText = `Просмотр: ${targetNickname}`;
-        
-        // Рендерим те же вкладки, но с флагом просмотра
-        renderStavshikTabs(body, targetNickname, true);
-    }
-
+        // Просмотр админом
+        function viewStavshikCabinet(targetNickname) {
+            const body = document.getElementById('cabinetBody');
+            const badge = document.getElementById('userBadge');
+            
+            badge.className = "badge badge-stavka";
+            badge.innerText = `Просмотр: ${targetNickname}`;
+            
+            renderStavshikTabs(body, targetNickname, true);
+        }
