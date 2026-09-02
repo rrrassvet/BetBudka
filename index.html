@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Братский Проект</title>
+    <title>Вход в систему</title>
     <style>
         * {
             margin: 0;
@@ -13,95 +13,197 @@
         }
 
         body {
-            background-color: #0d1117;
-            color: #c9d1d9;
-            line-height: 1.6;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
         }
 
-        header {
-            background-color: #161b22;
-            padding: 20px;
+        .welcome-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 40px 30px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
             text-align: center;
-            border-bottom: 2px solid #21262d;
         }
 
-        header h1 {
-            color: #58a6ff;
-            font-size: 2.5rem;
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            color: #fff;
         }
 
-        .container {
-            max-width: 800px;
-            margin: 40px auto;
-            padding: 20px;
-            background: #161b22;
+        .subtitle {
+            color: #94a3b8;
+            font-size: 0.95rem;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #cbd5e1;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 16px;
+            background: #0f172a;
+            border: 2px solid #334155;
             border-radius: 8px;
-            border: 1px solid #21262d;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-        }
-
-        h2 {
-            color: #f0f6fc;
-            margin-bottom: 15px;
-        }
-
-        p {
-            margin-bottom: 20px;
-            color: #8b949e;
-        }
-
-        .btn-container {
-            text-align: center;
-            margin-top: 30px;
-        }
-
-        .btn {
-            display: inline-block;
-            background-color: #238636;
-            color: #ffffff;
-            padding: 12px 24px;
+            color: #fff;
             font-size: 1rem;
-            font-weight: bold;
-            text-decoration: none;
-            border-radius: 6px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        .profile-selection {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .profile-option {
+            background: #1e293b;
+            border: 2px solid #334155;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .profile-option:hover {
+            border-color: #475569;
+            background: #24344d;
+        }
+
+        .profile-option.active {
+            border-color: #6366f1;
+            background: rgba(99, 102, 241, 0.15);
+        }
+
+        .profile-icon {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+        }
+
+        .profile-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: #6366f1;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
             transition: background 0.2s;
         }
 
-        .btn:hover {
-            background-color: #2ea043;
-            cursor: pointer;
+        .btn-submit:hover {
+            background: #4f46e5;
         }
 
-        footer {
-            text-align: center;
-            margin-top: 40px;
-            padding: 20px;
-            font-size: 0.9rem;
-            color: #8b949e;
+        .error-msg {
+            color: #ef4444;
+            font-size: 0.85rem;
+            margin-top: -15px;
+            margin-bottom: 15px;
+            text-align: left;
+            display: none;
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>Добро пожаловать на наш сайт!</h1>
-    </header>
+    <div class="welcome-card" id="loginCard">
+        <h1>Добро пожаловать</h1>
+        <p class="subtitle">Введите ваш никнейм и выберите профиль</p>
 
-    <div class="container">
-        <h2>О проекте</h2>
-        <p>Здесь будет твой топовый контент. Этот шаблон полностью готов к работе: он легкий, быстрый и отлично открывается с любого телефона.</p>
-        
-        <h2>Что делаем дальше?</h2>
-        <p>Ты можешь легко изменить любой текст в этом файле через обычный Блокнот. Поменяй заголовки, добавь свои контакты или описание услуг.</p>
-
-        <div class="btn-container">
-            <a href="https://t.me" target="_blank" class="btn">Связаться со мной</a>
+        <!-- Поле ввода -->
+        <div class="input-group">
+            <label for="nickname">Ваш никнейм</label>
+            <input type="text" id="nickname" placeholder="Например, Счастливчик" autocomplete="off">
         </div>
+        <div class="error-msg" id="errorBlock">Пожалуйста, заполните все поля!</div>
+
+        <!-- Выбор профиля -->
+        <label style="text-align: left; display: block;">Выберите ваш профиль</label>
+        <div class="profile-selection">
+            <div class="profile-option" onclick="selectProfile('Профиль А', this)">
+                <div class="profile-icon">🔥</div>
+                <div class="profile-title">Профиль А</div>
+            </div>
+            <div class="profile-option" onclick="selectProfile('Профиль Б', this)">
+                <div class="profile-icon">⚡</div>
+                <div class="profile-title">Профиль Б</div>
+            </div>
+        </div>
+
+        <button class="btn-submit" onclick="startSession()">Войти в систему</button>
     </div>
 
-    <footer>
-        <p>© 2026 Сделано по-братски для лучшего человека.</p>
-    </footer>
+    <script>
+        let selectedProfile = "";
 
+        // Функция выбора карточки
+        function selectProfile(profileName, element) {
+            // Сбрасываем активный класс у всех карточек
+            document.querySelectorAll('.profile-option').forEach(opt => {
+                opt.classList.remove('active');
+            });
+            // Добавляем активный класс выбранной
+            element.classList.add('active');
+            selectedProfile = profileName;
+            document.getElementById('errorBlock').style.display = 'none';
+        }
+
+        // Функция отправки
+        function startSession() {
+            const nickname = document.getElementById('nickname').value.trim();
+            const errorBlock = document.getElementById('errorBlock');
+
+            // Проверка на заполненность
+            if (!nickname || !selectedProfile) {
+                errorBlock.style.display = 'block';
+                return;
+            }
+
+            // Сохраняем данные в памяти браузера (по-братски, без серверов)
+            localStorage.setItem('userNickname', nickname);
+            localStorage.setItem('userProfile', selectedProfile);
+
+            // Имитация перехода на главную страницу сайта
+            alert(`Успех!\nНикнейм: ${nickname}\nПрофиль: ${selectedProfile}\n\nДальше перекидываем человека внутрь сайта!`);
+            
+            // Здесь будет код перехода: window.location.href = "dashboard.html";
+        }
+    </script>
 </body>
 </html>
+
