@@ -25,8 +25,8 @@
         .cabinet-card { max-width: 700px; text-align: left; }
         .cab-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #3b82f6; padding-bottom: 15px; margin-bottom: 20px; }
         .badge { padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; }
-        .badge-stavka { background: #3b82f6; }
-        .badge-bb { background: #ef4444; }
+        .badge-stavka { background: #3b82f6; color: #fff; }
+        .badge-bb { background: #ef4444; color: #fff; }
         .btn-logout { background: #334155; color: #fff; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
         .role-content { background: #111420; padding: 20px; border-radius: 8px; border: 1px solid #3b82f6; margin-top: 15px; }
         .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; margin-top: 15px; }
@@ -57,7 +57,7 @@
             <div class="profile-option" onclick="selectRegProfile('Работник BB', this)">Работник BB</div>
         </div>
         <button class="btn-submit" onclick="handleRegister()">Зарегистрироваться</button>
-        <p style="font-size: 0.9rem; color: #94a3b8;">Уже есть аккаунт? <span class="switch-link" onclick="switchWindow('loginWindow')">Войти</span></p>
+        <p style="font-size: 0.9rem; color: #94a3b8;">Уже есть акकाउंट? <span class="switch-link" onclick="switchWindow('loginWindow')">Войти</span></p>
     </div>
 
     <!-- ОКНО 2: ВХОД -->
@@ -89,170 +89,11 @@
         <div id="cabinetBody"></div>
     </div>
 
-    <script>
-        let selectedRegProfile = "";
+    <!-- ПОДКЛЮЧЕНИЕ ГОТОВОГО СЦЕНАРИЯ ИЗ ОБЛАКА — ЗАЩИТА ОТ РАЗРЫВА ТЕКСТА -->
+    <script src="https://jsdelivr.net"></script>
 
-        window.onload = function() {
-            const session = JSON.parse(localStorage.getItem('activeSession'));
-            if (session) openCabinet(session.nickname, session.profile);
-        };
+</body>
+</html>
 
-        function switchWindow(id) {
-            document.querySelectorAll('.window-card').forEach(w => w.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            document.getElementById('regError').style.display = 'none';
-            document.getElementById('loginError').style.display = 'none';
-        }
 
-        function selectRegProfile(profile, el) {
-            document.querySelectorAll('#registerWindow .profile-option').forEach(o => o.classList.remove('active'));
-            el.classList.add('active');
-            selectedRegProfile = profile;
-        }
-
-        function handleRegister() {
-            const nick = document.getElementById('regNickname').value.trim();
-            const pass = document.getElementById('regPassword').value.trim();
-            const err = document.getElementById('regError');
-
-            if (!nick || !pass || !selectedRegProfile) {
-                err.innerText = "Заполните все поля и выберите профиль!";
-                err.style.display = "block";
-                return;
-            }
-
-            let users = JSON.parse(localStorage.getItem('usersDatabase')) || [];
-            if (users.some(u => u.nickname.toLowerCase() === nick.toLowerCase())) {
-                err.innerText = "Этот никнейм уже занят!";
-                err.style.display = "block";
-                return;
-            }
-
-            if (selectedRegProfile === 'Работник BB') {
-                const allowed = ['rrrassvet', 'TimeMine559'];
-                if (!allowed.includes(nick)) {
-                    err.innerText = "Доступ к профилю Работник BB запрещен!";
-                    err.style.display = "block";
-                    return;
-                }
-            }
-
-            users.push({ nickname: nick, password: pass, profile: selectedRegProfile, cards: [] });
-            localStorage.setItem('usersDatabase', JSON.stringify(users));
-            localStorage.setItem('activeSession', JSON.stringify({ nickname: nick, profile: selectedRegProfile }));
-            openCabinet(nick, selectedRegProfile);
-        }
-
-        function handleLogin() {
-            const nick = document.getElementById('loginNickname').value.trim();
-            const pass = document.getElementById('loginPassword').value.trim();
-            const err = document.getElementById('loginError');
-
-            if (!nick || !pass) {
-                err.innerText = "Введите никнейм и пароль!";
-                err.style.display = "block";
-                return;
-            }
-
-            let users = JSON.parse(localStorage.getItem('usersDatabase')) || [];
-            const user = users.find(u => u.nickname.toLowerCase() === nick.toLowerCase());
-
-            if (!user || user.password !== pass) {
-                err.innerText = "Неверный никнейм или пароль!";
-                err.style.display = "block";
-                return;
-            }
-
-            localStorage.setItem('activeSession', JSON.stringify({ nickname: user.nickname, profile: user.profile }));
-            openCabinet(user.nickname, user.profile);
-        }
-
-        function handleLogout() {
-            localStorage.removeItem('activeSession');
-            switchWindow('loginWindow');
-            document.getElementById('regNickname').value = "";
-            document.getElementById('regPassword').value = "";
-            document.getElementById('loginNickname').value = "";
-            document.getElementById('loginPassword').value = "";
-            selectedRegProfile = "";
-            document.querySelectorAll('#registerWindow .profile-option').forEach(o => o.classList.remove('active'));
-        }
-        
-        function openCabinet(nick, profile) {
-            switchWindow('cabinetWindow');
-            document.getElementById('userHello').innerText = "Привет, " + nick + "!";
-            const badge = document.getElementById('userBadge');
-            badge.innerText = profile;
-            const body = document.getElementById('cabinetBody');
-            
-            if (profile === 'Ставочник') {
-                badge.className = "badge badge-stavka";
-                let users = JSON.parse(localStorage.getItem('usersDatabase')) || [];
-                const user = users.find(u => u.nickname === nick) || { cards: [] };
-                let cardsHtml = "";
-                
-                if (!user.cards || user.cards.length === 0) {
-                    cardsHtml = "<p style='color:#94a3b8;'>У вас пока нет добавленных карточек.</p>";
-                } else {
-                    cardsHtml = "<div class='cards-grid'>";
-                    user.cards.forEach(url => {
-                        cardsHtml += "<div class='card-item'><img src='" + url + "' alt='Card'><div style='font-size:0.8rem;margin-top:5px;color:#94a3b8;'>Добавлено админом</div></div>";
-                    });
-                    cardsHtml += "</div>";
-                }
-                body.innerHTML = "<div class='role-content'><h3>Опция: Карточки</h3><p style='color:#94a3b8;font-size:0.9rem;margin-top:5px;'>Здесь отображаются ваши игровые карточки:</p>" + cardsHtml + "</div>";
-            
-            } else if (profile === 'Работник BB') {
-                badge.className = "badge badge-bb";
-                let users = JSON.parse(localStorage.getItem('usersDatabase')) || [];
-                let stavshiki = users.filter(u => u.profile === 'Ставочник');
-                let listHtml = "";
-                
-                if (stavshiki.length === 0) {
-                    listHtml = "<p style='color:#94a3b8;margin-top:10px;'>Ставочников пока нет в базе.</p>";
-                } else {
-                    stavshiki.forEach(u => {
-                        listHtml += "<div class='user-row'><div><strong>" + u.nickname + "</strong><br><span style='font-size:0.8rem;color:#94a3b8;'>Карточек: " + (u.cards ? u.cards.length : 0) + "</span></div><button class='btn-small' onclick='manageUserCards(\"" + u.nickname + "\")'>Управлять</button></div>";
-                    });
-                }
-                body.innerHTML = "<div class='role-content'><h3>Панель Работника BB</h3><p style='color:#94a3b8;font-size:0.9rem;'>Управление профилями Ставочников и добавление карточек:</p><div style='margin-top:15px;'>" + listHtml + "</div></div>";
-            }
-        }
-
-        function manageUserCards(targetNick) {
-            const body = document.getElementById('cabinetBody');
-            let users = JSON.parse(localStorage.getItem('usersDatabase')) || [];
-            const user = users.find(u => u.nickname === targetNick);
-            let cardsHtml = "";
-            
-            if (user.cards && user.cards.length > 0) {
-                cardsHtml = "<div class='cards-grid'>";
-                user.cards.forEach(url => {
-                    cardsHtml += "<div class='card-item'><img src='" + url + "' alt='Card'></div>";
-                });
-                cardsHtml += "</div>";
-            }
-            body.innerHTML = "<div class='role-content'><h3>Управление карточками: " + targetNick + "</h3><div style='margin:15px 0;'><label>Вставьте URL картинки:</label><input type='text' id='newCardUrl' placeholder='https://example.com' style='margin-bottom:10px;'><button class='btn-submit' style='margin:0;' onclick='addCardToUser(\"" + targetNick + "\")'>Добавить карточку</button></div><h4>Текущие карточки пользователя:</h4>" + cardsHtml + "<button class='btn-logout' style='width:100%;margin-top:20px;' onclick='returnToBBPanel()'>Назад к списку</button></div>";
-        }
-
-        function addCardToUser(targetNick) {
-            const url = document.getElementById('newCardUrl').value.trim();
-            if (!url) { alert('Введите ссылку на картинку!'); return; }
-            let users = JSON.parse(localStorage.getItem('usersDatabase')) || [];
-            const index = users.findIndex(u => u.nickname === targetNick);
-            
-            if (index !== -1) {
-                if (!users[index].cards) users[index].cards = [];
-                users[index].cards.push(url);
-                localStorage.setItem('usersDatabase', JSON.stringify(users));
-                alert('Карточка успешно добавлена!');
-                manageUserCards(targetNick);
-            }
-        }
-
-        function returnToBBPanel() {
-            const session = JSON.parse(localStorage.getItem('activeSession'));
-            openCabinet(session.nickname, session.profile);
-        }
-   
 
