@@ -604,21 +604,51 @@
             let subMenuHtml = "<div class='tab-menu' style='margin-top:10px; border-color:#2563eb;'><button class='tab-btn " + (activeFantasySubTab === "players" ? activeColorClass : "") + "' onclick='switchFantasySubTab(\"players\", \"" + nick + "\", \"" + profile + "\")'>Игроки</button><button class='tab-btn " + (activeFantasySubTab === "playoff" ? activeColorClass : "") + "' onclick='switchFantasySubTab(\"playoff\", \"" + nick + "\", \"" + profile + "\")'>Плей-Офф</button></div>";
             let contentHtml = "";
 
-            if (activeFantasySubTab === "players") {
-                let playerCardsHtml = "";
+                        if (activeFantasySubTab === "players") {
+                // ОПЦИЯ: ИГРОКИ (Выбор 3 карточек из доступных)
                 let userCards = user.cards || [];
+                let selectedPlayers = user.selectedPlayers || []; // Массив ников/индексов выбранных карт
+                
+                let playerCardsHtml = "";
+                
                 if (userCards.length === 0) {
-                    playerCardsHtml = "<p style='color:#94a3b8;'>Вы еще не добавили ни одной карточки в личном кабинете.</p>";
+                    playerCardsHtml = "<p style='color:#94a3b8;'>У вас пока нет доступных карточек. Попросите Работника BB добавить их вам.</p>";
                 } else {
-                    playerCardsHtml = "<div class='cards-grid'>";
-                    let limit = Math.min(userCards.length, 3);
-                    for (let i = 0; i < limit; i++) {
-                        playerCardsHtml += "<div class='card-item'><img src='" + userCards[i] + "' alt='Card'><div style='font-size:0.8rem;margin-top:5px;color:#94a3b8;'>Игрок " + (i + 1) + "</div></div>";
+                    // Выводим выбранный на данный момент состав из 3 карт
+                    let activeSquadHtml = "";
+                    if (selectedPlayers.length === 0) {
+                        activeSquadHtml = "<p style='color:#ef4444; font-size:0.9rem; margin-bottom:15px;'>Вы еще не выбрали свой состав! Выберите строго 3 карточки ниже.</p>";
+                    } else {
+                        activeSquadHtml = "<h4 style='color:#fff; margin-bottom:10px;'>Ваш текущий состав лиги:</h4><div class='cards-grid' style='margin-bottom:25px;'>";
+                        selectedPlayers.forEach((url, i) => {
+                            activeSquadHtml += "<div class='card-item'><img src='" + url + "' alt='Squad Card'><div style='font-size:0.8rem;margin-top:5px;color:#2563eb;'>Игрок " + (i + 1) + "</div></div>";
+                        });
+                        activeSquadHtml += "</div>";
                     }
-                    playerCardsHtml += "</div>";
+
+                    // Выводим витрину ВСЕХ доступных карт для выбора
+                    let poolHtml = "<h4 style='color:#94a3b8; margin-bottom:10px; border-top:1px solid #475569; padding-top:15px;'>Доступный пул ваших карточек:</h4><div class='cards-grid'>";
+                    userCards.forEach((url, index) => {
+                        let isSelected = selectedPlayers.includes(url);
+                        let btnText = isSelected ? "Выбрано" : "Выбрать в состав";
+                        let btnStyle = isSelected ? "background:#22c55e;" : "background:#2563eb;";
+                        
+                        // Если смотрит админ, отключаем кнопки выбора
+                        let adminDisabled = isPreviewAdmin ? "display:none;" : "";
+
+                        poolHtml += "<div class='card-item'>" +
+                            "<img src='" + url + "' alt='Pool Card'>" +
+                            "<button class='btn-small' style='width:100%; margin-top:5px; font-size:0.75rem; " + btnStyle + " " + adminDisabled + "' onclick='togglePlayerInFantasy(\"" + nick + "\", \"" + url + "\")'>" + btnText + "</button>" +
+                        "</div>";
+                    });
+                    poolHtml += "</div>";
+
+                    playerCardsHtml = activeSquadHtml + poolHtml;
                 }
-                contentHtml = "<div class='role-content'><h3>Фэнтези-Лига: Игроки</h3><p style='color:#94a3b8;font-size:0.9rem;margin-top:5px;'>Здесь отображаются первые 3 карточки, добавленные вами самостоятельно или админом:</p>" + playerCardsHtml + "</div>";
+                
+                contentHtml = "<div class='role-content'><h3>Фэнтези-Лига: Выбор Игроков</h3><p style='color:#94a3b8;font-size:0.9rem;margin-top:5px;margin-bottom:15px;'>Соберите свою команду. Вы можете выбрать ровно 3 карточки:</p>" + playerCardsHtml + "</div>";
             }
+
             else if (activeFantasySubTab === "playoff") {
                 let predicts = user.predicts || {};
                 let selectOptions = "<option value=''>Выберите команду...</option>";
@@ -700,7 +730,34 @@
             
             reader.readAsDataURL(file);
         }
-
+        function togglePlayerInFantasy(nick, cardUrl) {
+            let users = JSON.parse(localStorage.getItem('usersDatabase')) || [];
+            const index = users.findIndex(u => u.nickname === nick);
+            
+            if (index !== -1) {
+                if (!users[index].selectedPlayers) users[index].selectedPlayers = [];
+                let selected = users[index].selectedPlayers;
+                
+                const cardIndex = selected.indexOf(cardUrl);
+                
+                if (cardIndex !== -1) {
+                    // Если карточка уже была выбрана, убираем её из состава
+                    selected.splice(cardIndex, 1);
+                } else {
+                    // Если карточка новая, проверяем лимит в 3 штуки
+                    if (selected.length >= 3) {
+                        alert('Вы уже выбрали максимум (3 карточки)! Сначала уберите кого-то из состава.');
+                        return;
+                    }
+                    selected.push(cardUrl);
+                }
+                
+                users[index].selectedPlayers = selected;
+                localStorage.setItem('usersDatabase', JSON.stringify(users));
+                openCabinet(nick, 'Ставочник');
+            }
+        }
+        
         function savePlayoffCard(nick, stageId, base64Data) {
             let users = JSON.parse(localStorage.getItem('usersDatabase')) || [];
             const index = users.findIndex(u => u.nickname === nick);
