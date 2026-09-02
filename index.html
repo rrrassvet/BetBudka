@@ -38,20 +38,25 @@
         .tab-btn { flex: 1; background: transparent; color: #94a3b8; border: none; padding: 10px; cursor: pointer; font-weight: 600; font-size: 0.9rem; border-radius: 4px; text-align: center; }
         .tab-btn.active { background: #2563eb; color: #ffffff; }
         .tab-btn.active-red { background: #dc2626; color: #ffffff; }
-        .bracket-wrapper { display: flex; align-items: center; justify-content: space-between; gap: 40px; margin-top: 20px; padding: 20px; background: #0b0f19; border-radius: 8px; overflow-x: auto; }
-        .bracket-column { display: flex; flex-direction: column; justify-content: space-around; height: 550px; position: relative; }
-        .bracket-column-title { text-align: center; font-size: 0.8rem; text-transform: uppercase; color: #94a3b8; background: #161b26; padding: 6px 12px; border-radius: 20px; margin-bottom: 15px; font-weight: bold; border: 1px solid #475569; }
-        .match-block { background: #161b26; border: 1px solid #475569; border-radius: 8px; width: 280px; padding: 12px; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        .match-block-pair-num { position: absolute; top: -10px; left: 10px; background: #334155; color: #94a3b8; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
-        .team-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .bracket-wrapper { display: flex; align-items: flex-start; justify-content: space-between; gap: 60px; margin-top: 25px; padding: 30px 20px; background: #0b0f19; border-radius: 12px; border: 1px solid #1e293b; overflow-x: auto; width: 100%; }
+        .bracket-column { display: flex; flex-direction: column; gap: 40px; height: auto; position: relative; min-width: 360px; }
+        .bracket-column:nth-child(1) { gap: 30px; }
+        .bracket-column:nth-child(2) { gap: 180px; padding-top: 85px; }
+        .bracket-column:nth-child(3) { gap: 0; padding-top: 235px; }
+        .bracket-column-title { text-align: center; font-size: 0.9rem; text-transform: uppercase; color: #ffffff; background: #161b26; padding: 8px 18px; border-radius: 20px; margin-bottom: 10px; font-weight: bold; border: 2px solid #3b82f6; box-shadow: 0 0 10px rgba(59, 130, 246, 0.3); }
+        .match-block { background: #161b26; border: 2px solid #475569; border-radius: 12px; width: 360px; padding: 16px; position: relative; box-shadow: 0 8px 25px rgba(0,0,0,0.6), 0 0 15px rgba(239, 68, 68, 0.1); }
+        .match-block-pair-num { position: absolute; top: -12px; left: 15px; background: #2563eb; color: #ffffff; font-size: 0.75rem; padding: 3px 8px; border-radius: 4px; font-weight: bold; z-index: 10; }
+        .team-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
         .team-row:last-child { border-bottom: none; }
-        .team-info { display: flex; align-items: center; gap: 12px; flex: 1; }
-        .team-avatar-square { width: 50px; height: 50px; border-radius: 6px; object-fit: cover; background: #070a14; border: 1px solid #475569; }
-        .team-name-select { background: transparent; border: none; color: #fff; font-size: 0.95rem; font-weight: bold; outline: none; cursor: pointer; width: 140px; }
+        .team-info { display: flex; align-items: center; gap: 16px; flex: 1; }
+        .team-avatar-square { width: 110px; height: 110px; border-radius: 8px; object-fit: cover; background: #070a14; border: 2px solid #475569; box-shadow: 0 4px 10px rgba(0,0,0,0.4); transition: border-color 0.2s; }
+        .team-avatar-square:hover { border-color: #ef4444; }
+        .team-name-select { background: transparent; border: none; color: #ffffff; font-size: 1.1rem; font-weight: bold; outline: none; cursor: pointer; width: 160px; }
         .team-name-select option { background: #161b26; color: #fff; }
-        .vs-divider { position: absolute; right: 75px; top: 50%; transform: translateY(-50%); font-size: 0.8rem; color: #475569; font-weight: bold; }
-        .file-upload-zone { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 50px; height: 50px; background: #0b0d14; border: 1px dashed #475569; border-radius: 4px; position: relative; }
+        .vs-divider { position: absolute; right: 105px; top: 50%; transform: translateY(-50%); font-size: 1rem; color: #ef4444; font-weight: 900; letter-spacing: 1px; }
+        .file-upload-zone { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 75px; height: 75px; background: #0b0d14; border: 2px dashed #475569; border-radius: 6px; position: relative; }
         .file-upload-zone img { width: 100%; height: 100%; object-fit: cover; border-radius: 4px; }
+        .cabinet-card { max-width: 100% !important; width: 95vw !important; }
     </style>
 </head>
 <body>
