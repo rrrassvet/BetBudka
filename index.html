@@ -530,7 +530,7 @@
             document.querySelectorAll('#registerWindow .profile-option').forEach(o => o.classList.remove('active'));
         }
         // ОТКРЫТИЕ ЛИЧНОГО КАБИНЕТА
-                // ГЛАВНАЯ ФУНКЦИЯ ОТРИСОВКИ ЛИЧНОГО КАБИНЕТА
+                        // ГЛАВНАЯ ФУНКЦИЯ ОТРИСОВКИ ЛИЧНОГО КАБИНЕТА (ОБНОВЛЕННАЯ)
         function openCabinet(nick, profile) {
             switchWindow('cabinetWindow');
             document.getElementById('userHello').innerText = "Привет, " + nick + "!";
@@ -538,7 +538,7 @@
             badge.innerText = profile;
             const body = document.getElementById('cabinetBody');
 
-            // Генерация верхнего меню вкладок для личного кабинета
+            // Генерация верхнего меню вкладок
             let tabMenuHtml = "" +
                 "<div class='tab-menu'>" +
                     "<button class='tab-btn " + (activeMainTab === "cards" ? "active" : "") + "' onclick='switchMainTab(\"cards\", \"" + nick + "\", \"" + profile + "\")'>Карточки</button>" +
@@ -551,27 +551,19 @@
                 const user = users.find(u => u.nickname === nick) || { cards: [], predicts: {} };
 
                 if (activeMainTab === "cards") {
-                    // Раздел: Карточки Ставочника
+                    // Раздел: Карточки Ставочника (Только просмотр)
                     let cardsHtml = "";
                     if (!user.cards || user.cards.length === 0) {
                         cardsHtml = "<p style='color:#94a3b8;'>У вас пока нет добавленных карточек.</p>";
                     } else {
                         cardsHtml = "<div class='cards-grid'>";
                         user.cards.forEach(url => {
-                            cardsHtml += "<div class='card-item'><img src='" + url + "' alt='Card'><div style='font-size:0.8rem;margin-top:5px;color:#94a3b8;'>Ваша карточка</div></div>";
+                            cardsHtml += "<div class='card-item'><img src='" + url + "' alt='Card'><div style='font-size:0.8rem;margin-top:5px;color:#94a3b8;'>Добавлено админом</div></div>";
                         });
                         cardsHtml += "</div>";
                     }
 
-                    // Форма, где Ставочник может САМ добавить себе карточку по URL
-                    let addCardForm = "" +
-                        "<div class='add-card-box'>" +
-                            "<h4>Добавить свою карточку</h4>" +
-                            "<input type='text' id='selfCardUrl' placeholder='Вставьте URL картинки карточки' style='margin: 10px 0;'>" +
-                            "<button class='btn-submit' style='margin:0;' onclick='handleSelfAddCard(\"" + nick + "\")'>Добавить карточку</button>" +
-                        "</div>";
-
-                    body.innerHTML = tabMenuHtml + addCardForm + "<div class='role-content'><h3>Мои карточки</h3>" + cardsHtml + "</div>";
+                    body.innerHTML = tabMenuHtml + "<div class='role-content'><h3>Мои карточки</h3>" + cardsHtml + "</div>";
 
                 } else if (activeMainTab === "fantasy") {
                     // Раздел: Фэнтези-Лига Ставочника
@@ -605,6 +597,7 @@
                 body.innerHTML = "<div class='role-content'><h3>Панель Работника BB</h3><p style='color:#94a3b8;font-size:0.9rem;'>Управление профилями Ставочников:</p><div style='margin-top:15px;'> " + listHtml + "</div></div>";
             }
         }
+
         // ФУНКЦИЯ ОТРИСОВКИ БЛОКА ФЭНТЕЗИ-ЛИГИ
         function renderFantasyLeagueBlock(container, mainTemplateHtml, user, nick, profile, isPreviewAdmin) {
             let activeColorClass = isPreviewAdmin ? "active-red" : "active";
