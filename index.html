@@ -5,227 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fantasy League BB</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Roboto, sans-serif;
-        }
-
-        body {
-            background: linear-gradient(135deg, #0f111a 0%, #1a0f11 100%);
-            color: #f8fafc;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        /* Общие карточки окон */
-        .window-card {
-            background: rgba(20, 24, 38, 0.85);
-            border: 2px solid #3b82f6; /* Синий акцент */
-            padding: 40px 30px;
-            border-radius: 12px;
-            width: 100%;
-            max-width: 500px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
-            text-align: center;
-            display: none;
-        }
-
-        .window-card.active {
-            display: block;
-        }
-
-        h1 {
-            font-size: 1.8rem;
-            margin-bottom: 8px;
-            color: #ffffff;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .subtitle {
-            color: #94a3b8;
-            font-size: 0.95rem;
-            margin-bottom: 25px;
-        }
-
-        .input-group {
-            margin-bottom: 15px;
-            text-align: left;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 6px;
-            color: #cbd5e1;
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        input {
-            width: 100%;
-            padding: 12px 16px;
-            background: #0b0d14;
-            border: 1px solid #475569;
-            border-radius: 6px;
-            color: #fff;
-            font-size: 1rem;
-            outline: none;
-            transition: all 0.3s ease;
-        }
-
-        input:focus {
-            border-color: #ef4444; /* Красный акцент при фокусе */
-            box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
-        }
-
-        .profile-selection {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-
-        .profile-option {
-            background: #161b26;
-            border: 2px solid #475569;
-            padding: 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-weight: 600;
-        }
-
-        .profile-option:hover {
-            border-color: #3b82f6;
-        }
-
-        .profile-option.active {
-            border-color: #ef4444; /* Красный цвет для активного профиля */
-            background: rgba(239, 68, 68, 0.1);
-        }
-
-        .btn-submit {
-            width: 100%;
-            background: #ef4444; /* Основная кнопка — красная */
-            color: white;
-            border: none;
-            padding: 14px;
-            border-radius: 6px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: background 0.2s;
-            margin-bottom: 15px;
-        }
-
-        .btn-submit:hover {
-            background: #dc2626;
-        }
-
-        .switch-link {
-            color: #3b82f6;
-            cursor: pointer;
-            font-size: 0.9rem;
-            text-decoration: underline;
-        }
-
-        .error-msg {
-            color: #ef4444;
-            font-size: 0.85rem;
-            margin-bottom: 15px;
-            text-align: center;
-            display: none;
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.2);
-            padding: 10px;
-            border-radius: 6px;
-        }
-
-        /* Личный кабинет */
-        .cabinet-card {
-            max-width: 800px;
-            text-align: left;
-        }
-
-        .cab-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid #3b82f6;
-            padding-bottom: 15px;
-            margin-bottom: 20px;
-        }
-
-        .badge {
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-        .badge-stavka { background: #3b82f6; color: #fff; }
-        .badge-bb { background: #ef4444; color: #fff; }
-
-        .btn-logout {
-            background: #334155;
-            color: #fff;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-        .btn-logout:hover { background: #475569; }
-
-        .role-content {
-            background: #111420;
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid #3b82f6;
-            margin-top: 15px;
-        }
-
-        /* Сетка для вывода карточек */
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
-        }
-
-        .card-item {
-            background: #161b26;
-            border: 1px solid #475569;
-            border-radius: 8px;
-            overflow: hidden;
-            text-align: center;
-            padding: 10px;
-        }
-
-        .card-item img {
-            width: 100%;
-            height: 150px;
-            object-fit: cover;
-            border-radius: 4px;
-            background: #0b0d14;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: linear-gradient(135deg, #0f111a 0%, #1a0f11 100%); color: #f8fafc; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .window-card { background: rgba(20, 24, 38, 0.95); border: 2px solid #3b82f6; padding: 30px; border-radius: 12px; width: 100%; max-width: 500px; box-shadow: 0 10px 30px rgba(0,0,0,0.7); text-align: center; display: none; }
+        .window-card.active { display: block; }
+        h1 { font-size: 1.6rem; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; color: #fff; }
+        .subtitle { color: #94a3b8; font-size: 0.9rem; margin-bottom: 20px; }
+        .input-group { margin-bottom: 15px; text-align: left; }
+        label { display: block; margin-bottom: 6px; color: #cbd5e1; font-size: 0.85rem; font-weight: 500; }
+        input { width: 100%; padding: 12px; background: #0b0d14; border: 1px solid #475569; border-radius: 6px; color: #fff; font-size: 1rem; outline: none; }
+        input:focus { border-color: #ef4444; }
+        .profile-selection { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .profile-option { background: #161b26; border: 2px solid #475569; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 600; text-align: center; }
+        .profile-option.active { border-color: #ef4444; background: rgba(239, 68, 68, 0.1); }
+        .btn-submit { width: 100%; background: #ef4444; color: white; border: none; padding: 12px; border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer; text-transform: uppercase; margin-bottom: 15px; }
+        .btn-submit:hover { background: #dc2626; }
+        .switch-link { color: #3b82f6; cursor: pointer; text-decoration: underline; font-size: 0.9rem; }
+        .error-msg { color: #ef4444; font-size: 0.85rem; margin-bottom: 15px; display: none; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239,68,68,0.2); padding: 10px; border-radius: 6px; }
+        .cabinet-card { max-width: 700px; text-align: left; }
+        .cab-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #3b82f6; padding-bottom: 15px; margin-bottom: 20px; }
+        .badge { padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; }
+        .badge-stavka { background: #3b82f6; }
+        .badge-bb { background: #ef4444; }
+        .btn-logout { background: #334155; color: #fff; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
+        .role-content { background: #111420; padding: 20px; border-radius: 8px; border: 1px solid #3b82f6; margin-top: 15px; }
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; margin-top: 15px; }
+        .card-item { background: #161b26; border: 1px solid #475569; border-radius: 8px; padding: 8px; text-align: center; }
+        .card-item img { width: 100%; height: 130px; object-fit: cover; border-radius: 4px; margin-bottom: 5px; }
+        .user-row { background: #161b26; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .btn-small { background: #3b82f6; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; }
     </style>
 </head>
 <body>
 
-    <!-- Окно 1: РЕГИСТРАЦИЯ -->
+    <!-- ОКНО 1: РЕГИСТРАЦИЯ -->
     <div class="window-card active" id="registerWindow">
         <h1>Регистрация</h1>
-        <p class="subtitle">Создайте аккаунт в системе</p>
+        <p class="subtitle">Создайте аккаунт в лиге</p>
         <div class="error-msg" id="regError"></div>
-
         <div class="input-group">
             <label>Никнейм</label>
             <input type="text" id="regNickname" autocomplete="off">
@@ -234,25 +51,20 @@
             <label>Пароль</label>
             <input type="password" id="regPassword">
         </div>
-
-        <label style="text-align: left; display: block; margin-bottom: 8px;">Выберите профиль</label>
+        <label style="text-align: left; display: block; margin-bottom: 8px; font-size: 0.85rem;">Выберите профиль</label>
         <div class="profile-selection">
             <div class="profile-option" onclick="selectRegProfile('Ставочник', this)">Ставочник</div>
             <div class="profile-option" onclick="selectRegProfile('Работник BB', this)">Работник BB</div>
         </div>
-
         <button class="btn-submit" onclick="handleRegister()">Зарегистрироваться</button>
-        <p style="font-size: 0.9rem; color: #94a3b8;">
-            Уже есть аккаунт? <span class="switch-link" onclick="switchWindow('loginWindow')">Войти</span>
-        </p>
+        <p style="font-size: 0.9rem; color: #94a3b8;">Уже есть аккаунт? <span class="switch-link" onclick="switchWindow('loginWindow')">Войти</span></p>
     </div>
 
-    <!-- Окно 2: АВТОРИЗАЦИЯ -->
+    <!-- ОКНО 2: ВХОД -->
     <div class="window-card" id="loginWindow">
         <h1>Вход в систему</h1>
-        <p class="subtitle">Введите свои данные для входа</p>
+        <p class="subtitle">Введите свои данные</p>
         <div class="error-msg" id="loginError"></div>
-
         <div class="input-group">
             <label>Никнейм</label>
             <input type="text" id="loginNickname" autocomplete="off">
@@ -261,117 +73,93 @@
             <label>Пароль</label>
             <input type="password" id="loginPassword">
         </div>
-
         <button class="btn-submit" onclick="handleLogin()">Войти в аккаунт</button>
-        <p style="font-size: 0.9rem; color: #94a3b8;">
-            Нет аккаунта? <span class="switch-link" onclick="switchWindow('registerWindow')">Создать аккаунт</span>
-        </p>
+        <p style="font-size: 0.9rem; color: #94a3b8;">Нет аккаунта? <span class="switch-link" onclick="switchWindow('registerWindow')">Создать аккаунт</span></p>
     </div>
 
-    <!-- Окно 3: ЛИЧНЫЙ КАБИНЕТ -->
+    <!-- ОКНО 3: ЛИЧНЫЙ КАБИНЕТ -->
     <div class="window-card cabinet-card" id="cabinetWindow">
         <div class="cab-header">
             <div>
-                <h2 id="userHello" style="color: #fff; font-size: 1.5rem;">Привет</h2>
-                <div style="margin-top: 5px;">
-                    <span id="userBadge" class="badge">Роль</span>
-                </div>
+                <h2 id="userHello" style="color: #fff; font-size: 1.4rem;">Привет</h2>
+                <div style="margin-top: 5px;"><span id="userBadge" class="badge">Роль</span></div>
             </div>
             <button class="btn-logout" onclick="handleLogout()">Выйти</button>
         </div>
-
         <div id="cabinetBody"></div>
     </div>
-    <!-- ЧАСТЬ 2: ЛОГИКА АВТОРИЗАЦИИ И СЕССИЙ -->
+
     <script>
         let selectedRegProfile = "";
 
-        // Проверка сессии при загрузке страницы
         window.onload = function() {
-            const currentSession = JSON.parse(localStorage.getItem('activeSession'));
-            if (currentSession) {
-                openCabinet(currentSession.nickname, currentSession.profile);
-            }
+            const session = JSON.parse(localStorage.getItem('activeSession'));
+            if (session) openCabinet(session.nickname, session.profile);
         };
 
-        // Навигация между окнами
-        function switchWindow(windowId) {
+        function switchWindow(id) {
             document.querySelectorAll('.window-card').forEach(w => w.classList.remove('active'));
-            document.getElementById(windowId).classList.add('active');
-            clearErrors();
-        }
-
-        function clearErrors() {
+            document.getElementById(id).classList.add('active');
             document.getElementById('regError').style.display = 'none';
             document.getElementById('loginError').style.display = 'none';
         }
 
-        // Выбор профиля на этапе регистрации
-        function selectRegProfile(profileName, element) {
-            document.querySelectorAll('#registerWindow .profile-option').forEach(opt => opt.classList.remove('active'));
-            element.classList.add('active');
-            selectedRegProfile = profileName;
-            document.getElementById('regError').style.display = 'none';
+        function selectRegProfile(profile, el) {
+            document.querySelectorAll('#registerWindow .profile-option').forEach(o => o.classList.remove('active'));
+            el.classList.add('active');
+            selectedRegProfile = profile;
         }
 
-        // ОБРАБОТКА РЕГИСТРАЦИИ
         function handleRegister() {
-            const nickname = document.getElementById('regNickname').value.trim();
-            const password = document.getElementById('regPassword').value.trim();
-            const errBox = document.getElementById('regError');
+            const nick = document.getElementById('regNickname').value.trim();
+            const pass = document.getElementById('regPassword').value.trim();
+            const err = document.getElementById('regError');
 
-            if (!nickname || !password || !selectedRegProfile) {
-                errBox.innerText = "Заполните все поля и выберите профиль!";
-                errBox.style.display = "block";
+            if (!nick || !pass || !selectedRegProfile) {
+                err.innerText = "Заполните все поля и выберите профиль!";
+                err.style.display = "block";
                 return;
             }
 
             let users = JSON.parse(localStorage.getItem('usersDatabase')) || [];
-
-            // Запрет на повторяющиеся никнеймы
-            if (users.some(u => u.nickname.toLowerCase() === nickname.toLowerCase())) {
-                errBox.innerText = "Этот никнейм уже занят!";
-                errBox.style.display = "block";
+            if (users.some(u => u.nickname.toLowerCase() === nick.toLowerCase())) {
+                err.innerText = "Этот никнейм уже занят!";
+                err.style.display = "block";
                 return;
             }
 
-            // Фейсконтроль для Работников BB
             if (selectedRegProfile === 'Работник BB') {
                 const allowed = ['rrrassvet', 'TimeMine559'];
-                if (!allowed.includes(nickname)) {
-                    errBox.innerText = "Доступ к профилю Работник BB запрещен для вашего никнейма!";
-                    errBox.style.display = "block";
+                if (!allowed.includes(nick)) {
+                    err.innerText = "Доступ к профилю Работник BB запрещен!";
+                    err.style.display = "block";
                     return;
                 }
             }
 
-            // Сохранение нового пользователя
-            users.push({ nickname, password, profile: selectedRegProfile, cards: [] });
+            users.push({ nickname: nick, password: pass, profile: selectedRegProfile, cards: [] });
             localStorage.setItem('usersDatabase', JSON.stringify(users));
-
-            // Автоматический вход после успешной регистрации
-            localStorage.setItem('activeSession', JSON.stringify({ nickname, profile: selectedRegProfile }));
-            openCabinet(nickname, selectedRegProfile);
+            localStorage.setItem('activeSession', JSON.stringify({ nickname: nick, profile: selectedRegProfile }));
+            openCabinet(nick, selectedRegProfile);
         }
 
-        // ОБРАБОТКА ВХОДА (АВТОРИЗАЦИЯ)
         function handleLogin() {
-            const nickname = document.getElementById('loginNickname').value.trim();
-            const password = document.getElementById('loginPassword').value.trim();
-            const errBox = document.getElementById('loginError');
+            const nick = document.getElementById('loginNickname').value.trim();
+            const pass = document.getElementById('loginPassword').value.trim();
+            const err = document.getElementById('loginError');
 
-            if (!nickname || !password) {
-                errBox.innerText = "Введите никнейм и пароль!";
-                errBox.style.display = "block";
+            if (!nick || !pass) {
+                err.innerText = "Введите никнейм и пароль!";
+                err.style.display = "block";
                 return;
             }
 
             let users = JSON.parse(localStorage.getItem('usersDatabase')) || [];
-            const user = users.find(u => u.nickname.toLowerCase() === nickname.toLowerCase());
+            const user = users.find(u => u.nickname.toLowerCase() === nick.toLowerCase());
 
-            if (!user || user.password !== password) {
-                errBox.innerText = "Неверный никнейм или пароль!";
-                errBox.style.display = "block";
+            if (!user || user.password !== pass) {
+                err.innerText = "Неверный никнейм или пароль!";
+                err.style.display = "block";
                 return;
             }
 
@@ -379,7 +167,6 @@
             openCabinet(user.nickname, user.profile);
         }
 
-        // ВЫХОД ИЗ СИСТЕМЫ
         function handleLogout() {
             localStorage.removeItem('activeSession');
             switchWindow('loginWindow');
@@ -388,6 +175,84 @@
             document.getElementById('loginNickname').value = "";
             document.getElementById('loginPassword').value = "";
             selectedRegProfile = "";
-            document.querySelectorAll('#registerWindow .profile-option').forEach(opt => opt.classList.remove('active'));
+            document.querySelectorAll('#registerWindow .profile-option').forEach(o => o.classList.remove('active'));
         }
+        
+        function openCabinet(nick, profile) {
+            switchWindow('cabinetWindow');
+            document.getElementById('userHello').innerText = "Привет, " + nick + "!";
+            const badge = document.getElementById('userBadge');
+            badge.innerText = profile;
+            const body = document.getElementById('cabinetBody');
+            
+            if (profile === 'Ставочник') {
+                badge.className = "badge badge-stavka";
+                let users = JSON.parse(localStorage.getItem('usersDatabase')) || [];
+                const user = users.find(u => u.nickname === nick) || { cards: [] };
+                let cardsHtml = "";
+                
+                if (!user.cards || user.cards.length === 0) {
+                    cardsHtml = "<p style='color:#94a3b8;'>У вас пока нет добавленных карточек.</p>";
+                } else {
+                    cardsHtml = "<div class='cards-grid'>";
+                    user.cards.forEach(url => {
+                        cardsHtml += "<div class='card-item'><img src='" + url + "' alt='Card'><div style='font-size:0.8rem;margin-top:5px;color:#94a3b8;'>Добавлено админом</div></div>";
+                    });
+                    cardsHtml += "</div>";
+                }
+                body.innerHTML = "<div class='role-content'><h3>Опция: Карточки</h3><p style='color:#94a3b8;font-size:0.9rem;margin-top:5px;'>Здесь отображаются ваши игровые карточки:</p>" + cardsHtml + "</div>";
+            
+            } else if (profile === 'Работник BB') {
+                badge.className = "badge badge-bb";
+                let users = JSON.parse(localStorage.getItem('usersDatabase')) || [];
+                let stavshiki = users.filter(u => u.profile === 'Ставочник');
+                let listHtml = "";
+                
+                if (stavshiki.length === 0) {
+                    listHtml = "<p style='color:#94a3b8;margin-top:10px;'>Ставочников пока нет в базе.</p>";
+                } else {
+                    stavshiki.forEach(u => {
+                        listHtml += "<div class='user-row'><div><strong>" + u.nickname + "</strong><br><span style='font-size:0.8rem;color:#94a3b8;'>Карточек: " + (u.cards ? u.cards.length : 0) + "</span></div><button class='btn-small' onclick='manageUserCards(\"" + u.nickname + "\")'>Управлять</button></div>";
+                    });
+                }
+                body.innerHTML = "<div class='role-content'><h3>Панель Работника BB</h3><p style='color:#94a3b8;font-size:0.9rem;'>Управление профилями Ставочников и добавление карточек:</p><div style='margin-top:15px;'>" + listHtml + "</div></div>";
+            }
+        }
+
+        function manageUserCards(targetNick) {
+            const body = document.getElementById('cabinetBody');
+            let users = JSON.parse(localStorage.getItem('usersDatabase')) || [];
+            const user = users.find(u => u.nickname === targetNick);
+            let cardsHtml = "";
+            
+            if (user.cards && user.cards.length > 0) {
+                cardsHtml = "<div class='cards-grid'>";
+                user.cards.forEach(url => {
+                    cardsHtml += "<div class='card-item'><img src='" + url + "' alt='Card'></div>";
+                });
+                cardsHtml += "</div>";
+            }
+            body.innerHTML = "<div class='role-content'><h3>Управление карточками: " + targetNick + "</h3><div style='margin:15px 0;'><label>Вставьте URL картинки:</label><input type='text' id='newCardUrl' placeholder='https://example.com' style='margin-bottom:10px;'><button class='btn-submit' style='margin:0;' onclick='addCardToUser(\"" + targetNick + "\")'>Добавить карточку</button></div><h4>Текущие карточки пользователя:</h4>" + cardsHtml + "<button class='btn-logout' style='width:100%;margin-top:20px;' onclick='returnToBBPanel()'>Назад к списку</button></div>";
+        }
+
+        function addCardToUser(targetNick) {
+            const url = document.getElementById('newCardUrl').value.trim();
+            if (!url) { alert('Введите ссылку на картинку!'); return; }
+            let users = JSON.parse(localStorage.getItem('usersDatabase')) || [];
+            const index = users.findIndex(u => u.nickname === targetNick);
+            
+            if (index !== -1) {
+                if (!users[index].cards) users[index].cards = [];
+                users[index].cards.push(url);
+                localStorage.setItem('usersDatabase', JSON.stringify(users));
+                alert('Карточка успешно добавлена!');
+                manageUserCards(targetNick);
+            }
+        }
+
+        function returnToBBPanel() {
+            const session = JSON.parse(localStorage.getItem('activeSession'));
+            openCabinet(session.nickname, session.profile);
+        }
+   
 
