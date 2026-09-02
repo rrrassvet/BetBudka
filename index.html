@@ -4,8 +4,232 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fantasy League BB</title>
-    <style>
-                /* Стили для вкладок внутри личного кабинета */
+       <style>
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: 'Segoe UI', sans-serif; 
+        }
+        
+        body { 
+            background: linear-gradient(135deg, #0f111a 0%, #1a0f11 100%); 
+            color: #f8fafc; 
+            min-height: 100vh; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            padding: 20px; 
+        }
+        
+        .window-card { 
+            background: rgba(20, 24, 38, 0.95); 
+            border: 2px solid #3b82f6; 
+            padding: 30px; 
+            border-radius: 12px; 
+            width: 100%; 
+            max-width: 500px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7); 
+            text-align: center; 
+            display: none; 
+        }
+        
+        .window-card.active { 
+            display: block; 
+        }
+        
+        h1 { 
+            font-size: 1.6rem; 
+            margin-bottom: 8px; 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+            color: #fff; 
+        }
+        
+        .subtitle { 
+            color: #94a3b8; 
+            font-size: 0.9rem; 
+            margin-bottom: 20px; 
+        }
+        
+        .input-group { 
+            margin-bottom: 15px; 
+            text-align: left; 
+        }
+        
+        label { 
+            display: block; 
+            margin-bottom: 6px; 
+            color: #cbd5e1; 
+            font-size: 0.85rem; 
+            font-weight: 500; 
+        }
+        
+        input { 
+            width: 100%; 
+            padding: 12px; 
+            background: #0b0d14; 
+            border: 1px solid #475569; 
+            border-radius: 6px; 
+            color: #fff; 
+            font-size: 1rem; 
+            outline: none; 
+        }
+        
+        input:focus { 
+            border-color: #ef4444; 
+        }
+        
+        .profile-selection { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 15px; 
+            margin-bottom: 20px; 
+        }
+        
+        .profile-option { 
+            background: #161b26; 
+            border: 2px solid #475569; 
+            padding: 12px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            text-align: center; 
+        }
+        
+        .profile-option.active { 
+            border-color: #ef4444; 
+            background: rgba(239, 68, 68, 0.1); 
+        }
+        
+        .btn-submit { 
+            width: 100%; 
+            background: #ef4444; 
+            color: white; 
+            border: none; 
+            padding: 12px; 
+            border-radius: 6px; 
+            font-size: 1rem; 
+            font-weight: bold; 
+            cursor: pointer; 
+            text-transform: uppercase; 
+            margin-bottom: 15px; 
+        }
+        
+        .btn-submit:hover { 
+            background: #dc2626; 
+        }
+        
+        .switch-link { 
+            color: #3b82f6; 
+            cursor: pointer; 
+            text-decoration: underline; 
+            font-size: 0.9rem; 
+        }
+        
+        .error-msg { 
+            color: #ef4444; 
+            font-size: 0.85rem; 
+            margin-bottom: 15px; 
+            display: none; 
+            background: rgba(239, 68, 68, 0.1); 
+            border: 1px solid rgba(239,68,68,0.2); 
+            padding: 10px; 
+            border-radius: 6px; 
+        }
+        
+        .cabinet-card { 
+            max-width: 700px; 
+            text-align: left; 
+        }
+        
+        .cab-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border-bottom: 2px solid #3b82f6; 
+            padding-bottom: 15px; 
+            margin-bottom: 20px; 
+        }
+        
+        .badge { 
+            padding: 4px 10px; 
+            border-radius: 4px; 
+            font-size: 0.8rem; 
+            font-weight: bold; 
+            text-transform: uppercase; 
+        }
+        
+        .badge-stavka { 
+            background: #3b82f6; 
+            color: #fff; 
+        }
+        
+        .badge-bb { 
+            background: #ef4444; 
+            color: #fff; 
+        }
+        
+        .btn-logout { 
+            background: #334155; 
+            color: #fff; 
+            border: none; 
+            padding: 8px 16px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+        }
+        
+        .role-content { 
+            background: #111420; 
+            padding: 20px; 
+            border-radius: 8px; 
+            border: 1px solid #3b82f6; 
+            margin-top: 15px; 
+        }
+        
+        .cards-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); 
+            gap: 15px; 
+            margin-top: 15px; 
+        }
+        
+        .card-item { 
+            background: #161b26; 
+            border: 1px solid #475569; 
+            border-radius: 8px; 
+            padding: 8px; 
+            text-align: center; 
+        }
+        
+        .card-item img { 
+            width: 100%; 
+            height: 130px; 
+            object-fit: cover; 
+            border-radius: 4px; 
+            margin-bottom: 5px; 
+        }
+        
+        .user-row { 
+            background: #161b26; 
+            padding: 12px; 
+            border-radius: 8px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 10px; 
+        }
+        
+        .btn-small { 
+            background: #3b82f6; 
+            color: #fff; 
+            border: none; 
+            padding: 6px 12px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 0.85rem; 
+        }
+
         .tab-menu {
             display: flex;
             background: #0b0f19;
@@ -38,16 +262,6 @@
             color: #ffffff;
         }
 
-        /* Форма добавления карточек ставочником */
-        .add-card-box {
-            background: #161b26;
-            padding: 15px;
-            border-radius: 6px;
-            border: 1px solid #475569;
-            margin-bottom: 20px;
-        }
-
-        /* Графическая сетка плей-офф с аватарками команд */
         .bracket-wrapper {
             display: flex;
             align-items: center;
@@ -122,7 +336,6 @@
             flex: 1;
         }
 
-        /* Квадратная аватарка команды 500х500 в сетке */
         .team-avatar-square {
             width: 50px;
             height: 50px;
@@ -158,7 +371,6 @@
             font-weight: bold;
         }
 
-        /* Стили для выбора особой карточки Ставочника */
         .file-upload-zone {
             display: flex;
             flex-direction: column;
