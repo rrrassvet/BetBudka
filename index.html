@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fantasy League BB</title>
+    <script src="https://jsdelivr.net"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background: linear-gradient(135deg, #0f111a 0%, #1a0f11 100%); color: #f8fafc; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
@@ -111,6 +112,10 @@
         <div id="cabinetBody"></div>
     </div>
     <script>
+        const SUPABASE_URL = "sb_publishable_Cf2Xumahh3LUmxP0732GNQ_fP3eyxVK";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5nZGxhdWp3d2dlY21hd2tiYW9iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg0NDk3MzMsImV4cCI6MjEwNDAyNTczM30.qhglbIu-M4OJLdirqJvhzeBQhh5Eat3IpO52-9eH8ec";
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
         let selectedRegProfile = "";
         let activeMainTab = "cards"; 
         let activeFantasySubTab = "players"; 
@@ -120,12 +125,10 @@
             "Команда 5", "Команда 6", "Команда 7", "Команда 8"
         ];
 
-        window.onload = function() {
-            const session = JSON.parse(localStorage.getItem('activeSession'));
-            if (session) openCabinet(session.nickname, session.profile);
-        };
-        window.addEventListener('storage', function(e) { if (e.key === 'usersDatabase' || e.key === 'teamImagesDatabase') { const session = JSON.parse(localStorage.getItem('activeSession')); if (session) openCabinet(session.nickname, session.profile); } });
+        let usersDatabase=[];let teamImagesDatabase={};async function loadCloudData(){try{let{data:u}=await supabase.from('app_data').select('*').eq('key','usersDatabase').single();if(u)usersDatabase=u.value;else await supabase.from('app_data').insert([{key:'usersDatabase',value:[]}]);let{data:t}=await supabase.from('app_data').select('*').eq('key','teamImagesDatabase').single();if(t)teamImagesDatabase=t.value;else await supabase.from('app_data').insert([{key:'teamImagesDatabase',value:{}}]);const s=JSON.parse(localStorage.getItem('activeSession'));if(s)openCabinet(s.nickname,s.profile)}catch(e){console.log(e)}}function subscribeToCloudChanges(){supabase.channel('schema-db-changes').on('postgres_changes',{event:'*',scheme:'public',table:'app_data'},p=>{if(p.new&&p.new.key==='usersDatabase')usersDatabase=p.new.value;if(p.new&&p.new.key==='teamImagesDatabase')teamImagesDatabase=p.new.value;const s=JSON.parse(localStorage.getItem('activeSession'));if(s)openCabinet(s.nickname,s.profile)}).subscribe()}window.onload=async function(){await loadCloudData();subscribeToCloudChanges()};async function saveCloudData(k,v){await supabase.from('app_data').update({value:v}).eq('key',k)}
 
+        };
+       
         function switchWindow(id) {
             document.querySelectorAll('.window-card').forEach(w => w.classList.remove('active'));
             document.getElementById(id).classList.add('active');
@@ -149,53 +152,8 @@
             openCabinet(nick, profile);
         }
 
-        function handleRegister() {
-            const nick = document.getElementById('regNickname').value.trim();
-            const pass = document.getElementById('regPassword').value.trim();
-            const err = document.getElementById('regError');
-            if (!nick || !pass || !selectedRegProfile) {
-                err.innerText = "Заполните все поля и выберите профиль!";
-                err.style.display = "block";
-                return;
-            }
-            let users = JSON.parse(localStorage.getItem('usersDatabase')) || [];
-            if (users.some(u => u.nickname.toLowerCase() === nick.toLowerCase())) {
-                err.innerText = "Этот никнейм уже занят!";
-                err.style.display = "block";
-                return;
-            }
-            if (selectedRegProfile === 'Работник BB') {
-                const allowed = ['rrrassvet', 'TimeMine559'];
-                if (!allowed.includes(nick)) {
-                    err.innerText = "Доступ к профилю Работник BB запрещен!";
-                    err.style.display = "block";
-                    return;
-                }
-            }
-            users.push({ nickname: nick, password: pass, profile: selectedRegProfile, cards: [], predicts: {}, selectedPlayers: [] });
-            localStorage.setItem('usersDatabase', JSON.stringify(users));
-            localStorage.setItem('activeSession', JSON.stringify({ nickname: nick, profile: selectedRegProfile }));
-            openCabinet(nick, selectedRegProfile);
-        }
+        function handleRegister(){const n=document.getElementById('regNickname').value.trim();const p=document.getElementById('regPassword').value.trim();const e=document.getElementById('regError');if(!n||!p||!selectedRegProfile){e.innerText="Заполните все поля и выберите профиль!";e.style.display="block";return}if(usersDatabase.some(u=>u.nickname.toLowerCase()===n.toLowerCase())){e.innerText="Этот никнейм уже занят!";e.style.display="block";return}if(selectedRegProfile==='Работник BB'){const a=['rrrassvet','TimeMine559'];if(!a.includes(n)){e.innerText="Доступ к профилю Работник BB запрещен!";e.style.display="block";return}}usersDatabase.push({nickname:n,password:p,profile:selectedRegProfile,cards:[],predicts:{},selectedPlayers:[]});saveCloudData('usersDatabase',usersDatabase);localStorage.setItem('activeSession',JSON.stringify({nickname:n,profile:selectedRegProfile}));openCabinet(n,selectedRegProfile)}function handleLogin(){const n=document.getElementById('loginNickname').value.trim();const p=document.getElementById('loginPassword').value.trim();const e=document.getElementById('loginError');if(!n||!p){e.innerText="Введите никнейм и пароль!";e.style.display="block";return}const u=usersDatabase.find(x=>x.nickname.toLowerCase()===n.toLowerCase());if(!u||u.password!==p){e.innerText="Неверный никнейм или пароль!";e.style.display="block";return}localStorage.setItem('activeSession',JSON.stringify({nickname:u.nickname,profile:u.profile}));openCabinet(u.nickname,u.profile)}
 
-        function handleLogin() {
-            const nick = document.getElementById('loginNickname').value.trim();
-            const pass = document.getElementById('loginPassword').value.trim();
-            const err = document.getElementById('loginError');
-            if (!nick || !pass) {
-                err.innerText = "Введите никнейм и пароль!";
-                err.style.display = "block";
-                return;
-            }
-            let users = JSON.parse(localStorage.getItem('usersDatabase')) || [];
-            const user = users.find(u => u.nickname.toLowerCase() === nick.toLowerCase());
-            if (!user || user.password !== pass) {
-                err.innerText = "Неверный никнейм или пароль!";
-                err.style.display = "block";
-                return;
-            }
-            localStorage.setItem('activeSession', JSON.stringify({ nickname: user.nickname, profile: user.profile }));
-            openCabinet(user.nickname, user.profile);
         }
 
         function handleLogout() {
@@ -208,256 +166,16 @@
             selectedRegProfile = "";
             document.querySelectorAll('#registerWindow .profile-option').forEach(o => o.classList.remove('active'));
         }
-        function openCabinet(nick, profile) {
-            switchWindow('cabinetWindow');
-            document.getElementById('userHello').innerText = "Привет, " + nick + "!";
-            const badge = document.getElementById('userBadge');
-            badge.innerText = profile;
-            const body = document.getElementById('cabinetBody');
 
-            let tabMenuHtml = "<div class='tab-menu'>" +
-                "<button class='tab-btn " + (activeMainTab === "cards" ? "active" : "") + "' onclick='switchMainTab(\"cards\", \"" + nick + "\", \"" + profile + "\")'>Карточки</button>" +
-                "<button class='tab-btn " + (activeMainTab === "fantasy" ? "active" : "") + "' onclick='switchMainTab(\"fantasy\", \"" + nick + "\", \"" + profile + "\")'>Фэнтези-Лига</button>" +
-                "</div>";
-
-            if (profile === 'Ставочник') {
-                badge.className = "badge badge-stavka";
-                let users = JSON.parse(localStorage.getItem('usersDatabase')) || [];
-                const user = users.find(u => u.nickname === nick) || { cards: [], predicts: {}, selectedPlayers: [] };
-
-                if (activeMainTab === "cards") {
-                    let cardsHtml = "";
-                    if (!user.cards || user.cards.length === 0) {
-                        cardsHtml = "<p style='color:#94a3b8;'>У вас пока нет добавленных карточек.</p>";
-                    } else {
-                        cardsHtml = "<div class='cards-grid'>";
-                        user.cards.forEach(url => {
-                            cardsHtml += "<div class='card-item'><img src='" + url + "' alt='Card'><div style='font-size:0.8rem;margin-top:5px;color:#94a3b8;'>Добавлено админом</div></div>";
-                        });
-                        cardsHtml += "</div>";
-                    }
-                    body.innerHTML = tabMenuHtml + "<div class='role-content'><h3>Мои карточки</h3>" + cardsHtml + "</div>";
-                } else if (activeMainTab === "fantasy") {
-                    renderFantasyLeagueBlock(body, tabMenuHtml, user, nick, profile, false);
-                }
-            } else if (profile === 'Работник BB') {
-                badge.className = "badge badge-bb";
-                let users = JSON.parse(localStorage.getItem('usersDatabase')) || [];
-                let teamImages = JSON.parse(localStorage.getItem('teamImagesDatabase')) || {};
-                let stavshiki = users.filter(u => u.profile === 'Ставочник');
-                let listHtml = "";
-                if (stavshiki.length === 0) {
-                    listHtml = "<p style='color:#94a3b8;margin-top:10px;'>Ставочников пока нет в базе.</p>";
-                } else {
-                    stavshiki.forEach(u => {
-                        listHtml += "<div class='user-row'><div><strong>" + u.nickname + "</strong><br><span style='font-size:0.8rem;color:#94a3b8;'>Карточек: " + (u.cards ? u.cards.length : 0) + "</span></div><div><button class='btn-small' style='margin-right:8px; background:#dc2626;' onclick='viewUserFantasy(\"" + u.nickname + "\")'>Фэнтези</button><button class='btn-small' onclick='manageUserCards(\"" + u.nickname + "\")'>Карточки</button></div></div>";
-                    });
-                }
-                let teamsUploadHtml = "<h4 style='color:#ffffff; margin-top:25px; margin-bottom:15px; border-top:1px solid #475569; padding-top:15px; text-transform:uppercase; font-size:1rem;'>Загрузка аватарок команд (500x500 PNG)</h4><div style='display:grid; grid-template-columns: 1fr 1fr; gap:15px;'>";
-                playoffTeams.forEach((teamName, index) => {
-                    let currentImg = teamImages["team_" + index] || "";
-                    let imgPreview = currentImg ? "<img src='" + currentImg + "' style='width:40px; height:40px; object-fit:cover; border-radius:4px; border:1px solid #475569;'>" : "<div style='width:40px; height:40px; background:#070a14; border-radius:4px;'></div>";
-                    teamsUploadHtml += "<div style='background:#161b26; padding:10px; border-radius:6px; border:1px solid #475569; display:flex; align-items:center; justify-content:space-between; gap:10px;'><div style='flex:1;'><div style='font-size:0.85rem; font-weight:bold; color:#fff; margin-bottom:5px;'>" + teamName + "</div><input type='file' accept='.png' onchange='uploadTeamAvatar(" + index + ", this)' style='font-size:0.75rem; width:100%; color:#94a3b8;'></div>" + imgPreview + "</div>";
-                });
-                teamsUploadHtml += "</div>";
-                body.innerHTML = "<div class='role-content'><h3>Панель Работника BB</h3><p style='color:#94a3b8;font-size:0.9rem;'>Управление профилями Ставочников:</p><div style='margin-top:15px;'> " + listHtml + "</div>" + teamsUploadHtml + "</div>";
-            }
+        function openCabinet(nick,profile){switchWindow('cabinetWindow');document.getElementById('userHello').innerText="Привет, "+nick+"!";const badge=document.getElementById('userBadge');badge.innerText=profile;const body=document.getElementById('cabinetBody');let tabMenuHtml="<div class='tab-menu'><button class='tab-btn "+(activeMainTab==="cards"?"active":"")+"' onclick='switchMainTab(\"cards\",\""+nick+"\",\""+profile+"\")'>Карточки</button><button class='tab-btn "+(activeMainTab==="fantasy"?"active":"")+"' onclick='switchMainTab(\"fantasy\",\""+nick+"\",\""+profile+"\")'>Фэнтези-Лига</button></div>";if(profile==='Ставочник'){badge.className="badge badge-stavka";const user=usersDatabase.find(u=>u.nickname===nick)||\{cards:[],predicts:\},selectedPlayers:[]\};if(activeMainTab==="cards")\{let html="";if(!user.cards||user.cards.length===0)\{html="<p style='color:#94a3b8;'>У вас пока нет добавленных карточек.</p>";\}else\{html="<div class='cards-grid'>";user.cards.forEach(url=>{html+="<div class='card-item'><img src='"+url+"' alt='Card'><div style='font-size:0.8rem;margin-top:5px;color:#94a3b8;'>Добавлено админом</div></div>";});html+="</div>";\}body.innerHTML=tabMenuHtml+"<div class='role-content'><h3>Мои карточки</h3>"+html+"</div>";\}else if(activeMainTab==="fantasy")\{renderFantasyLeagueBlock(body,tabMenuHtml,user,nick,profile,false);\}\}else if(profile==='Работник BB'){badge.className="badge badge-bb";let stavshiki=usersDatabase.filter(u=>u.profile==='Ставочник');let listHtml="";if(stavshiki.length===0)\{listHtml="<p style='color:#94a3b8;margin-top:10px;'>Ставочников пока нет в базе.</p>";\}else\{stavshiki.forEach(u=>{listHtml+="<div class='user-row'><div><strong>"+u.nickname+"</strong><br><span style='font-size:0.8rem;color:#94a3b8;'>Карточек: "+(u.cards?u.cards.length:0)+"</span></div><div><button class='btn-small' style='margin-right:8px; background:#dc2626;' onclick='viewUserFantasy(\""+u.nickname+"\")'>Фэнтези</button><button class='btn-small' onclick='manageUserCards(\""+u.nickname+"\")'>Карточки</button></div></div>";});\}let teamsUploadHtml="<h4 style='color:#ffffff; margin-top:25px; margin-bottom:15px; border-top:1px solid #475569; padding-top:15px; text-transform:uppercase; font-size:1rem;'>Загрузка аватарок команд (500x500 PNG)</h4><div style='display:grid; grid-template-columns: 1fr 1fr; gap:15px;'>";playoffTeams.forEach((teamName,index)=>{let currentImg=teamImagesDatabase["team_"+index]||"";let imgPreview=currentImg?"<img src='"+currentImg+"' style='width:40px; height:40px; object-fit:cover; border-radius:4px; border:1px solid #475569;'>":"<div style='width:40px; height:40px; background:#070a14; border-radius:4px;'></div>";teamsUploadHtml+="<div style='background:#161b26; padding:10px; border-radius:6px; border:1px solid #475569; display:flex; align-items:center; justify-content:space-between; gap:10px;'><div style='flex:1;'><div style='font-size:0.85rem; font-weight:bold; color:#fff; margin-bottom:5px;'>"+teamName+"</div><input type='file' accept='.png' onchange='uploadTeamAvatar("+index+", this)' style='font-size:0.75rem; width:100%; color:#94a3b8;'></div>"+imgPreview+"</div>";});teamsUploadHtml+="</div>";body.innerHTML="<div class='role-content'><h3>Панель Работника BB</h3><p style='color:#94a3b8;font-size:0.9rem;'>Управление профилями Ставочников:</p><div style='margin-top:15px;'> "+listHtml+"</div>"+teamsUploadHtml+"</div>";}}
+        
         }
-        function renderFantasyLeagueBlock(container, mainTemplateHtml, user, nick, profile, isPreviewAdmin) {
-            let activeColorClass = isPreviewAdmin ? "active-red" : "active";
-            let subMenuHtml = "<div class='tab-menu' style='margin-top:10px; border-color:#2563eb;'><button class='tab-btn " + (activeFantasySubTab === "players" ? activeColorClass : "") + "' onclick='switchFantasySubTab(\"players\", \"" + nick + "\", \"" + profile + "\")'>Игроки</button><button class='tab-btn " + (activeFantasySubTab === "playoff" ? activeColorClass : "") + "' onclick='switchFantasySubTab(\"playoff\", \"" + nick + "\", \"" + profile + "\")'>Плей-Офф</button></div>";
-            let contentHtml = "";
-
-            if (activeFantasySubTab === "players") {
-                let userCards = user.cards || [];
-                let selectedPlayers = user.selectedPlayers || [];
-                let playerCardsHtml = "";
-                if (userCards.length === 0) {
-                    playerCardsHtml = "<p style='color:#94a3b8;'>У вас пока нет доступных карточек. Попросите Работника BB добавить их вам.</p>";
-                } else {
-                    let activeSquadHtml = "";
-                    if (selectedPlayers.length === 0) {
-                        activeSquadHtml = "<p style='color:#ef4444; font-size:0.9rem; margin-bottom:15px;'>Вы еще не выбрали свой состав! Выберите строго 3 карточки ниже.</p>";
-                    } else {
-                        activeSquadHtml = "<h4 style='color:#fff; margin-bottom:10px;'>Ваш текущий состав лиги:</h4><div class='cards-grid' style='margin-bottom:25px;'>";
-                        selectedPlayers.forEach((url, i) => { activeSquadHtml += "<div class='card-item'><img src='" + url + "' alt='Card'><div style='font-size:0.8rem;margin-top:5px;color:#2563eb;'>Игрок " + (i + 1) + "</div></div>"; });
-                        activeSquadHtml += "</div>";
-                    }
-                    let poolHtml = "<h4 style='color:#94a3b8; margin-bottom:10px; border-top:1px solid #475569; padding-top:15px;'>Доступный пул ваших карточек:</h4><div class='cards-grid'>";
-                    userCards.forEach((url, index) => {
-                        let isSelected = selectedPlayers.includes(url);
-                        let btnText = isSelected ? "Выбрано" : "Выбрать в состав";
-                        let btnStyle = isSelected ? "background:#22c55e;" : "background:#2563eb;";
-                        let adminDisabled = isPreviewAdmin ? "display:none;" : "";
-                        poolHtml += "<div class='card-item'><img src='" + url + "' alt='Card'><button class='btn-small' style='width:100%; margin-top:5px; font-size:0.75rem; " + btnStyle + " " + adminDisabled + "' onclick='togglePlayerInFantasy(\"" + nick + "\", \"" + url + "\")'>" + btnText + "</button></div>";
-                    });
-                    poolHtml += "</div>";
-                    playerCardsHtml = activeSquadHtml + poolHtml;
-                }
-                contentHtml = "<div class='role-content'><h3>Фэнтези-Лига: Выбор Игроков</h3><p style='color:#94a3b8;font-size:0.9rem;margin-top:5px;margin-bottom:15px;'>Соберите свою команду. Вы можете выбрать ровно 3 карточки:</p>" + playerCardsHtml + "</div>";
-            }
-            else if (activeFantasySubTab === "playoff") {
-                let predicts = user.predicts || {};
-                let userCards = user.cards || [];
-                let teamImages = JSON.parse(localStorage.getItem('teamImagesDatabase')) || {};
-
-                function buildCardSelectOptions(stageId) {
-                    let cardVal = predicts[stageId + "_card"] || "";
-                    let options = "<option value=''>Карта...</option>";
-                    userCards.forEach((url, index) => {
-                        let isUsed = false;
-                        const stages = ["q1", "q2", "q3", "q4", "h1", "h2", "f1"];
-                        stages.forEach(st => { if (st !== stageId && predicts[st + "_card"] === url) isUsed = true; });
-                        if (!isUsed || url === cardVal) {
-                            options += "<option value='" + url + "' " + (url === cardVal ? "selected" : "") + ">Карточка " + (index + 1) + "</option>";
-                        }
-                    });
-                    return options;
-                }
-
-                function buildGraphMatch(stageId, pairNum, defA, defB, indexA, indexB) {
-                    let winVal = predicts[stageId + "_win"] || "";
-                    let loseVal = predicts[stageId + "_lose"] || "";
-                    let cardVal = predicts[stageId + "_card"] || "";
-                    let disabledAttr = isPreviewAdmin ? "disabled" : "";
-                    let optsA = "<option value=''>" + defA + "</option>";
-                    let optsB = "<option value=''>" + defB + "</option>";
-                    if (stageId.startsWith("q")) {
-                        optsA = "<option value='" + defA + "' selected>" + defA + "</option>";
-                        optsB = "<option value='" + defB + "' selected>" + defB + "</option>";
-                    } else {
-                        playoffTeams.forEach(t => {
-                            optsA += "<option value='" + t + "' " + (winVal === t ? "selected" : "") + ">" + t + "</option>";
-                            optsB += "<option value='" + t + "' " + (loseVal === t ? "selected" : "") + ">" + t + "</option>";
-                        });
-                    }
-                    let srcA = teamImages["team_" + indexA] || "";
-                    let srcB = teamImages["team_" + indexB] || "";
-                    let imgA = srcA ? "<img src='" + srcA + "' class='team-avatar-square'>" : "<div class='team-avatar-square'></div>";
-                    let imgB = srcB ? "<img src='" + srcB + "' class='team-avatar-square'>" : "<div class='team-avatar-square'></div>";
-                    let selectHtml = isPreviewAdmin ? "" : "<div class='file-upload-zone' style='margin-left:10px; width:70px; height:50px;'><select " + disabledAttr + " onchange='savePlayoffCard(\"" + nick + "\", \"" + stageId + "\", this.value)' style='width:100%; font-size:0.7rem; background:#161b26; color:#fff; border:1px solid #475569; border-radius:4px;'>" + buildCardSelectOptions(stageId) + "</select></div>";
-                    return "<div class='match-block'><div class='match-block-pair-num'>#" + pairNum + "</div><div style='display:flex; align-items:center; justify-content:space-between;'><div style='flex:1;'><div class='team-row'><div class='team-info'>" + imgA + "<select " + disabledAttr + " class='team-name-select' onchange='savePlayoffSelect(\"" + nick + "\", \"" + stageId + "\", this.value)'>" + optsA + "</select></div></div><div class='team-row'><div class='team-info'>" + imgB + "<select " + disabledAttr + " class='team-name-select' onchange='savePlayoffSelect(\"" + nick + "\", \"" + stageId + "\", this.value)'>" + optsB + "</select></div></div></div><div class='vs-divider'>VS</div>" + selectHtml + (cardVal ? "<div class='file-upload-zone' style='width:45px; height:45px; margin-left:5px;'><img src='" + cardVal + "'></div>" : "") + "</div></div>";
-                }
-
-                let bracketHtml = "<div class='bracket-wrapper'><div class='bracket-column'><div class='bracket-column-title'>1/4 Финал</div>" + buildGraphMatch("q1", "1", "Команда 1", "Команда 2", 0, 1) + buildGraphMatch("q2", "2", "Команда 3", "Команда 4", 2, 3) + buildGraphMatch("q3", "3", "Команда 5", "Команда 6", 4, 5) + buildGraphMatch("q4", "4", "Команда 7", "Команда 8", 6, 7) + "</div><div class='bracket-column'><div class='bracket-column-title'>1/2 Финал</div>" + buildGraphMatch("h1", "1", "Ожидание...", "Ожидание...", 0, 1) + buildGraphMatch("h2", "2", "Ожидание...", "Ожидание...", 2, 3) + "</div><div class='bracket-column'><div class='bracket-column-title'>Финал WB</div>" + buildGraphMatch("f1", "1", "Финалист 1", "Финалист 2", 4, 5) + "</div></div>";
-                contentHtml = "<div class='role-content'><h3>Фэнтези-Лига: Плей-Офф</h3><p style='color:#94a3b8;font-size:0.9rem;'>Выберите исходы и прикрепите карты команд:</p>" + bracketHtml + "</div>";
-            }
-
-            if (isPreviewAdmin) {
-                container.innerHTML = mainTemplateHtml + subMenuHtml + contentHtml + "<button class='btn-logout' style='width:100%;margin-top:20px;' onclick='returnToBBPanel()'>Назад к списку</button>";
-            } else {
-                container.innerHTML = mainTemplateHtml + subMenuHtml + contentHtml;
-            }
-        }
-        function togglePlayerInFantasy(nick, cardUrl) {
-            let users = JSON.parse(localStorage.getItem('usersDatabase')) || [];
-            const index = users.findIndex(u => u.nickname === nick);
-            if (index !== -1) {
-                if (!users[index].selectedPlayers) users[index].selectedPlayers = [];
-                let selected = users[index].selectedPlayers;
-                const cardIndex = selected.indexOf(cardUrl);
-                if (cardIndex !== -1) { selected.splice(cardIndex, 1); } else {
-                    if (selected.length >= 3) { alert('Вы уже выбрали максимум (3 карточки)! Сначала уберите кого-то из состава.'); return; }
-                    selected.push(cardUrl);
-                }
-                users[index].selectedPlayers = selected;
-                localStorage.setItem('usersDatabase', JSON.stringify(users));
-                openCabinet(nick, 'Ставочник');
-            }
-        }
-
-        function savePlayoffSelect(nick, key, value) {
-            let users = JSON.parse(localStorage.getItem('usersDatabase')) || [];
-            const index = users.findIndex(u => u.nickname === nick);
-            if (index !== -1) {
-                if (!users[index].predicts) users[index].predicts = {};
-                users[index].predicts[key] = value;
-                localStorage.setItem('usersDatabase', JSON.stringify(users));
-            }
-        }
-
-        function savePlayoffCard(nick, stageId, base64Data) {
-            let users = JSON.parse(localStorage.getItem('usersDatabase')) || [];
-            const index = users.findIndex(u => u.nickname === nick);
-            if (index !== -1) {
-                if (!users[index].predicts) users[index].predicts = {};
-                const currentPredicts = users[index].predicts;
-                if (base64Data !== "") {
-                    const stages = ["q1", "q2", "q3", "q4", "h1", "h2", "f1"];
-                    let isDuplicate = false;
-                    stages.forEach(st => { if (st !== stageId && currentPredicts[st + "_card"] === base64Data) isDuplicate = true; });
-                    if (isDuplicate) { alert('Эту особую карточку конкретной команды можно добавить лишь один раз!'); openCabinet(nick, 'Ставочник'); return; }
-                }
-                currentPredicts[stageId + "_card"] = base64Data;
-                localStorage.setItem('usersDatabase', JSON.stringify(users));
-                openCabinet(nick, 'Ставочник');
-            }
-        }
-        function uploadTeamAvatar(teamIndex, input) {
-            if (!input.files || input.files.length === 0) return;
-            const file = input.files[0];
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const base64Data = e.target.result;
-                let teamImages = JSON.parse(localStorage.getItem('teamImagesDatabase')) || {};
-                teamImages["team_" + teamIndex] = base64Data;
-                localStorage.setItem('teamImagesDatabase', JSON.stringify(teamImages));
-                alert('Аватарка успешно обновлена!');
-                const session = JSON.parse(localStorage.getItem('activeSession'));
-                openCabinet(session.nickname, session.profile);
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function viewUserFantasy(targetNick) {
-            let users = JSON.parse(localStorage.getItem('usersDatabase')) || [];
-            const user = users.find(u => u.nickname === targetNick) || { cards: [], predicts: {}, selectedPlayers: [] };
-            const body = document.getElementById('cabinetBody');
-            let templateHtml = "<div style='background:rgba(37, 99, 235, 0.1); border:1px dashed #2563eb; padding:10px; border-radius:4px; margin-bottom:15px; font-size:0.9rem; color:#3b82f6; font-weight:500;'>Вы просматриваете Фэнтези-Лигу пользователя: <strong>" + targetNick + "</strong></div>";
-            renderFantasyLeagueBlock(body, templateHtml, user, targetNick, 'Работник BB', true);
-        }
-
-        function manageUserCards(targetNick) {
-            const body = document.getElementById('cabinetBody');
-            let users = JSON.parse(localStorage.getItem('usersDatabase')) || [];
-            const user = users.find(u => u.nickname === targetNick);
-            let cardsHtml = "";
-            if (user.cards && user.cards.length > 0) {
-                cardsHtml = "<div class='cards-grid'>";
-                user.cards.forEach(url => { cardsHtml += "<div class='card-item'><img src='" + url + "' alt='Card'></div>"; });
-                cardsHtml += "</div>";
-            }
-            body.innerHTML = "<div class='role-content'><h3>Управление карточками: " + targetNick + "</h3><div style='margin:15px 0;'><label>Выберите карточку (PNG):</label><input type='file' id='newCardFile' accept='.png' style='margin-bottom:10px; background:#070a14; border:1px solid #475569; padding:10px; width:100%; color:#fff; border-radius:4px;'><button class='btn-submit' style='margin-top:10px; margin-bottom:0;' onclick='addCardToUser(\"" + targetNick + "\")'>Загрузить PNG карточку</button></div><h4>Текущие карточки пользователя:</h4>" + cardsHtml + "<button class='btn-logout' style='width:100%;margin-top:20px;' onclick='returnToBBPanel()'>Назад к списку</button></div>";
-        }
-
-               function addCardToUser(targetNick) {
-            const fileInput = document.getElementById('newCardFile');
-            if (!fileInput || fileInput.files.length === 0) { alert('Выберите PNG файл!'); return; }
-            const file = fileInput.files[0];
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const base64Data = e.target.result;
-                let users = JSON.parse(localStorage.getItem('usersDatabase')) || [];
-                const index = users.findIndex(u => u.nickname === targetNick);
-                if (index !== -1) {
-                    // Жесткая проверка: создаем массив, если его нет, и пушим новую карту
-                    if (!users[index].cards) { users[index].cards = []; }
-                    users[index].cards.push(base64Data);
-                    localStorage.setItem('usersDatabase', JSON.stringify(users));
-                    alert('PNG карточка успешно загружена!');
-                    manageUserCards(targetNick);
-                }
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function returnToBBPanel() {
-            const session = JSON.parse(localStorage.getItem('activeSession'));
-            openCabinet(session.nickname, session.profile);
-        }
+        
+       function renderFantasyLeagueBlock(c,m,u,n,p,i){let a=i?"active-red":"active";let s="<div class='tab-menu' style='margin-top:10px; border-color:#2563eb;'><button class='tab-btn "+(activeFantasySubTab==="players"?a:"")+"' onclick='switchFantasySubTab(\"players\",\""+n+"\",\""+p+"\")'>Игроки</button><button class='tab-btn "+(activeFantasySubTab==="playoff"?a:"")+"' onclick='switchFantasySubTab(\"playoff\",\""+n+"\",\""+p+"\")'>Плей-Офф</button></div>";let html="";if(activeFantasySubTab==="players"){let uc=u.cards||[];let sp=u.selectedPlayers||[];let ph="";if(uc.length===0){ph="<p style='color:#94a3b8;'>У вас пока нет доступных карточек. Попросите Работника BB добавить их вам.</p>";}else{let ash="";if(sp.length===0){ash="<p style='color:#ef4444; font-size:0.9rem; margin-bottom:15px;'>Вы еще не выбрали свой состав! Выберите строго 3 карточки ниже.</p>";}else{ash="<h4 style='color:#fff; margin-bottom:10px;'>Ваш текущий состав лиги:</h4><div class='cards-grid' style='margin-bottom:25px;'>";sp.forEach((url,x)=>{ash+="<div class='card-item'><img src='"+url+"'><div style='font-size:0.8rem;margin-top:5px;color:#2563eb;'>Игрок "+(x+1)+"</div></div>";});ash+="</div>";}let pool="<h4 style='color:#94a3b8; margin-bottom:10px; border-top:1px solid #475569; padding-top:15px;'>Доступный пул ваших карточек:</h4><div class='cards-grid'>";uc.forEach((url,idx)=>{let sel=sp.includes(url);let txt=sel?"Выбрано":"Выбрать в состав";let stl=sel?"background:#22c55e;":"background:#2563eb;";let dis=i?"display:none;":"";pool+="<div class='card-item'><img src='"+url+"'><button class='btn-small' style='width:100%; margin-top:5px; font-size:0.75rem; "+stl+" "+dis+"' onclick='togglePlayerInFantasy(\""+n+"\",\""+url+"\")'>"+txt+"</button></div>";});pool+="</div>";ph=ash+pool;}html="<div class='role-content'><h3>Фэнтези-Лига: Выбор Игроков</h3><p style='color:#94a3b8;font-size:0.9rem;margin-top:5px;margin-bottom:15px;'>Соберите свою команду (строго 3 карточки):</p>"+ph+"</div>";}else if(activeFantasySubTab==="playoff"){let pr=u.predicts||{};let uc=u.cards||[];function bOpts(stg){let cv=pr[stg+"_card"]|| "";let o="<option value=''>Карта...</option>";uc.forEach((url,x)=>{let usd=false;const stgs=["q1","q2","q3","q4","h1","h2","f1"];stgs.forEach(s=>{if(s!==stg&&pr[s+"_card"]===url)usd=true;});if(!usd||url===cv){o+="<option value='"+url+"' "+(url===cv?"selected":"")+">Карточка "+(x+1)+"</option>";}});return o;}function bMatch(stg,num,dA,dB,iA,iB){let wV=pr[stg+"_win"]||"";let lV=pr[stg+"_lose"]||"";let cV=pr[stg+"_card"]||"";let dis=i?"disabled":"";let oA="<option value=''>"+dA+"</option>";let oB="<option value=''>"+dB+"</option>";if(stg.startsWith("q")){oA="<option value='"+dA+"' selected>"+dA+"</option>";oB="<option value='"+dB+"' selected>"+dB+"</option>";}else{playoffTeams.forEach(t=>{oA+="<option value='"+t+"' "+(wV===t?"selected":"")+">"+t+"</option>";oB+="<option value='"+t+"' "+(lV===t?"selected":"")+">"+t+"</option>";});}let sA=teamImagesDatabase["team_"+iA]||"";let sB=teamImagesDatabase["team_"+iB]||"";let imA=sA?"<img src='"+sA+"' class='team-avatar-square'>":"<div class='team-avatar-square'></div>";let imB=sB?"<img src='"+sB+"' class='team-avatar-square'>":"<div class='team-avatar-square'></div>";let selH=i?"":"<div class='file-upload-zone' style='margin-left:10px; width:70px; height:50px;'><select "+dis+" onchange='savePlayoffCard(\""+n+"\",\""+stg+"\",this.value)' style='width:100%; font-size:0.7rem; background:#161b26; color:#fff; border:1px solid #475569; border-radius:4px;'>"+bOpts(stg)+"</select></div>";return "<div class='match-block'><div class='match-block-pair-num'>#"+num+"</div><div style='display:flex; align-items:center; justify-content:space-between;'><div style='flex:1;'><div class='team-row'><div class='team-info'>"+imA+"<select "+dis+" class='team-name-select' onchange='savePlayoffSelect(\""+n+"\",\""+stg+"_win\",this.value)'>"+oA+"</select></div></div><div class='team-row'><div class='team-info'>"+imB+"<select "+dis+" class='team-name-select' onchange='savePlayoffSelect(\""+n+"\",\""+stg+"_lose\",this.value)'>"+oB+"</select></div></div></div><div class='vs-divider'>VS</div>"+selH+(cV?"<div class='file-upload-zone' style='width:45px; height:45px; margin-left:5px;'><img src='"+cV+"'></div>":"")+"</div></div>";}let brH="<div class='bracket-wrapper'><div class='bracket-column'><div class='bracket-column-title'>1/4 Финал</div>"+bMatch("q1","1","Команда 1","Команда 2",0,1)+bMatch("q2","2","Команда 3","Команда 4",2,3)+bMatch("q3","3","Команда 5","Команда 6",4,5)+bMatch("q4","4","Команда 7","Команда 8",6,7)+"</div><div class='bracket-column'><div class='bracket-column-title'>1/2 Финал</div>"+bMatch("h1","1","Ожидание...","Ожидание...",0,1)+bMatch("h2","2","Ожидание...","Ожидание...",2,3)+"</div><div class='bracket-column'><div class='bracket-column-title'>Финал WB</div>"+bMatch("f1","1","Финалист 1","Финалист 2",4,5)+"</div></div>";html="<div class='role-content'><h3>Фэнтези-Лига: Плей-Офф</h3><p style='color:#94a3b8;font-size:0.9rem;'>Выберите исходы и прикрепите карты команд:</p>"+brH+"</div>";}if(i){c.innerHTML=m+s+html+"<button class='btn-logout' style='width:100%;margin-top:20px;' onclick='returnToBBPanel()'>Назад к списку</button>";}else{c.innerHTML=m+s+html;}}function togglePlayerInFantasy(n,url){const idx=usersDatabase.findIndex(u=>u.nickname===n);if(idx!==-1){if(!usersDatabase[idx].selectedPlayers)usersDatabase[idx].selectedPlayers=[];let s=usersDatabase[idx].selectedPlayers;const cIdx=s.indexOf(url);if(cIdx!==-1){s.splice(cIdx,1);}else{if(s.length>=3){alert('Вы уже выбрали максимум (3 карточки)! Сначала уберите кого-то из состава.');return;}s.push(url);}usersDatabase[idx].selectedPlayers=s;saveCloudData('usersDatabase',usersDatabase);openCabinet(n,'Ставочник');}}function savePlayoffSelect(n,k,v){const idx=usersDatabase.findIndex(u=>u.nickname===n);if(idx!==-1){if(!usersDatabase[idx].predicts)usersDatabase[idx].predicts={};usersDatabase[idx].predicts[k]=v;saveCloudData('usersDatabase',usersDatabase);}}function savePlayoffCard(n,stg,bd){const idx=usersDatabase.findIndex(u=>u.nickname===n);if(idx!==-1){if(!usersDatabase[idx].predicts)usersDatabase[idx].predicts={};const cp=usersDatabase[idx].predicts;if(bd!==""){const stgs=["q1","q2","q3","q4","h1","h2","f1"];let dup=false;stgs.forEach(s=>{if(s!==stg&&cp[s+"_card"]===bd)dup=true;});if(dup){alert('Эту особую карточку конкретной команды можно добавить лишь один раз!');openCabinet(n,'Ставочник');return;}}cp[stg+"_card"]=bd;usersDatabase[idx].predicts=cp;saveCloudData('usersDatabase',usersDatabase);openCabinet(n,'Ставочник');}}function uploadTeamAvatar(idx,input){if(!input.files||input.files.length===0)return;const r=new FileReader();r.onload=function(e){teamImagesDatabase["team_"+idx]=e.target.result;saveCloudData('teamImagesDatabase',teamImagesDatabase);alert('Аватарка успешно обновлена!');};r.readAsDataURL(input.files[0]);}function viewUserFantasy(tN){const u=usersDatabase.find(x=>x.nickname===tN)||\{cards:[],predicts:\{\},selectedPlayers:[]\};const b=document.getElementById('cabinetBody');let t="<div style='background:rgba(37,99,235,0.1); border:1px dashed #2563eb; padding:10px; border-radius:4px; margin-bottom:15px; font-size:0.9rem; color:#3b82f6; font-weight:500;'>Вы просматриваете Фэнтези-Лигу пользователя: <strong>"+tN+"</strong></div>";renderFantasyLeagueBlock(b,t,u,tN,'Работник BB',true);}function manageUserCards(tN){const b=document.getElementById('cabinetBody');const u=usersDatabase.find(x=>x.nickname===tN);let h="";if(u.cards&&u.cards.length > 0){h="<div class='cards-grid'>";u.cards.forEach(url=>{h+="<div class='card-item'><img src='"+url+"'></div>";});h+="</div>";}b.innerHTML="<div class='role-content'><h3>Управление карточками: "+tN+"</h3><div style='margin:15px 0;'><label>Выберите карточку (PNG):</label><input type='file' id='newCardFile' accept='.png' style='margin-bottom:10px; background:#070a14; border:1px solid #475569; padding:10px; width:100%; color:#fff; border-radius:4px;'><button class='btn-submit' style='margin-top:10px; margin-bottom:0;' onclick='addCardToUser(\""+tN+"\")'>Загрузить PNG карточку</button></div><h4>Текущие карточки пользователя:</h4>"+h+"<button class='btn-logout' style='width:100%;margin-top:20px;' onclick='returnToBBPanel()'>Назад к списку</button></div>";}function addCardToUser(tN){const fi=document.getElementById('newCardFile');if(!fi||fi.files.length===0){alert('Выберите PNG файл!');return;}const r=new FileReader();r.onload=function(e){const idx=usersDatabase.findIndex(u=>u.nickname===tN);if(idx!==-1){if(!usersDatabase[idx].cards)usersDatabase[idx].cards=[];usersDatabase[idx].cards.push(e.target.result);saveCloudData('usersDatabase',usersDatabase);alert('PNG карточка успешно загружена!');manageUserCards(tN);}};r.readAsDataURL(fi.files[0]);}function returnToBBPanel(){const s=JSON.parse(localStorage.getItem('activeSession'));openCabinet(s.nickname,s.profile);}
     </script>
 </body>
 </html>
+
 
 
 
